@@ -13,6 +13,8 @@
 /1    /2   /3   /4  /5  /6  /7  /8   1st octet
 ```
 
+## Data
+```
 Dela upp nätet på:
 Grupp                     Idag   Med 25 % tillväxt
 Klienter                   120   150
@@ -23,7 +25,7 @@ Databaser                    4     5
 Logg och övervakning         3     4
 DMZ                          4     5
 Länknät mellan routrar       3 st à 2 adresser
-
+```
 
 10.40.0.0/16
 32-16=16
