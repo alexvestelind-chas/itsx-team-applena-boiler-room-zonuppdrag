@@ -83,3 +83,18 @@ Länk 3:
 | 10.40.1.144/30 | Länknät 3 | 10.40.1.145 – 10.40.1.146 | Nätverk | — | Punkt-till-punkt mellan routrar |
 
 **Reserverat utrymme:** 10.40.1.148 – 10.40.255.255 ledigt för framtida grupper/tillväxt (merparten av /16 oanvänt).
+
+
+### Vilka subnät ska nå varandra
+
+| Från | Till | Tillåtet/Nekat | Motivering |
+|---|---|---|---|
+| Klienter | DMZ | Tillåtet (specifika portar) | Normal webbanvändning |
+| DMZ | Servrar | Tillåtet (specifika portar) | Webbserver anropar applikationslogik |
+| Servrar | Databaser | Tillåtet (specifika portar) | Endast applikationslagret pratar med databasen |
+| Drift och administration | Alla zoner | Tillåtet | Jump-server behöver kunna administrera allt |
+| Alla zoner | Logg och övervakning | Tillåtet | Central loggning kräver att alla skickar till loggservern |
+| Gäst och besök | Internet (endast) | Tillåtet | Ingen åtkomst till interna zoner |
+| Klienter | Databaser | **Nekat** | Ingen direkt väg – ska gå via applikationslagret |
+| DMZ | Databaser | **Nekat** | Webb och data ska aldrig prata direkt |
+| Gäst och besök | Övriga interna zoner | **Nekat** | Gäster ska vara helt isolerade |
