@@ -5,5 +5,7 @@
 ## Arbetssätt (grenar, granskning, commit-meddelanden)
 ## Ansvar (vem gör vad, projektbräda)
 ## Kommunikation (Slack, passtider)
+## Github
+-Kommunicera i vilken/vilka filer ni jobbar i för att undvika merge conflicts.
 ## Beslut och oenighet
 ## När är något klart? 
