@@ -73,6 +73,11 @@ Länk 3:
 
 
 
+## Tables
+
+
+### Adressplan
+
 | Prefix | Syfte | Adressintervall | Ansvarig tjänst | Reserverat utrymme | Kommentar |
 |---|---|---|---|---|---|
 | 10.40.0.0/24 | Klienter | 10.40.0.1 – 10.40.0.254 | IT-drift | - | 150 av 254 i bruk, plats för vidare tillväxt |
