@@ -1,5 +1,7 @@
 ## Adressplan – 10.40.0.0/16
 
+**Förutsättningar:** Uppdragsgivarens adressutrymme är 10.40.0.0/16 (RFC 1918). Adressplanen omfattar IPv4. IPv6 är avstängt på labbservrarna och ingår inte i planen. 25 % tillväxt är inräknad på samtliga grupper utom länknät.
+
 ### Subnet cheat-sheet
 
 128   64   32   16   8   4   2   1   Group Size
@@ -69,7 +71,7 @@ Länk 3:
 
 | Prefix | Syfte | Adressintervall | Ansvarig tjänst | Reserverat utrymme | Kommentar |
 |---|---|---|---|---|---|
-| 10.40.0.0/24 | Klienter | 10.40.0.1 – 10.40.0.254 | IT-drift | 10.40.2.0/24 – 10.40.255.0/16 | 150 av 254 i bruk, plats för vidare tillväxt |
+| 10.40.0.0/24 | Klienter | 10.40.0.1 – 10.40.0.254 | IT-drift | - | 150 av 254 i bruk, plats för vidare tillväxt |
 | 10.40.1.0/26 | Gäst och besök | 10.40.1.1 – 10.40.1.62 | IT-drift | — | Isolerat, bara internetåtkomst |
 | 10.40.1.64/27 | Servrar | 10.40.1.65 – 10.40.1.94 | Drift | — | Applikations- och filservrar |
 | 10.40.1.96/28 | Drift och administration | 10.40.1.97 – 10.40.1.110 | Drift | — | Jump-server, adminverktyg |
