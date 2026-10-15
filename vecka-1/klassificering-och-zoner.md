@@ -14,7 +14,7 @@
 
 ## Zontabell
 
-| Zon | Innehåller | Nät (exempel) |
+| Zon | Innehåller | Nät |
 |---|---|---|
 | DMZ | Publik webbserver | 10.40.1.128/29 |
 | Klientzon | 30 arbetsplatser | 10.40.0.0/24 |
