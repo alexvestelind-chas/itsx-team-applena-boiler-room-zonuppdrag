@@ -34,43 +34,72 @@ Länknät mellan routrar       3 st à 2 adresser
 Klientnätverk:
 10.40.0.0/24 (254 tillgängliga adresser)
 10.40.0.1 - 10.40.0.254
+32-24=8
+2^8=256
+256-2=254 tillgängliga adresser
 
 Gäst & besök:
 10.40.1.0/26 (62 tillgängliga)
 10.40.1.1 - 10.40.1.62
+32-26=6
+2^6=64
+64-2=62 tillgängliga adresser
 
 Servrar:
 10.40.1.64/27 (30)
 10.40.1.65 - 10.40.1.94
+32-27=5
+2^5=32
+32-2=30 tillgängliga adresser
 
 Drift & admin:
 10.40.1.96/28 (14)
 10.40.1.97 - 10.40.1.110
+32-28=4
+2^4=16
+16-2=14 tillgängliga adresser
 
 Databaser:
 10.40.1.112/29 (6)
 10.40.1.113 - 10.40.1.118
+32-29=3
+2^3=8
+8-2=6 tillgängliga adresser
 
 Logg & övervakning:
 10.40.1.120/29 (6)
 10.40.1.121 - 10.40.1.126
+32-29=3
+2^3=8
+8-2=6 tillgängliga adresser
 
 DMZ:
 10.40.1.128/29 (6)
 10.40.1.129 - 10.40.1.134
+32-29=3
+2^3=8
+8-2=6 tillgängliga adresser
 
 Länk 1:
 10.40.1.136/30 (2)
 10.40.1.137 - 10.40.1.138
+32-30=2
+2^2=4
+4-2=2 tillgängliga adresser
 
 Länk 2:
 10.40.1.140/30 (2)
 10.40.1.141 - 10.40.1.142
+32-30=2
+2^2=4
+4-2=2 tillgängliga adresser
 
 Länk 3:
 10.40.1.144/30 (2)
 10.40.1.145 - 10.40.1.146
-
+32-30=2
+2^2=4
+4-2=2 tillgängliga adresser
 
 
 ## Tables
