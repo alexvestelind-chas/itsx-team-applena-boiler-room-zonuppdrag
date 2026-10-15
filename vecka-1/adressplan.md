@@ -34,6 +34,8 @@ Länknät mellan routrar       3 st à 2 adresser
 Klientnätverk:
 10.40.0.0/24 (254 tillgängliga adresser)
 10.40.0.1 - 10.40.0.254
+nät: 10.40.0.0
+broadcast: 10.40.0.255
 32-24=8
 2^8=256
 256-2=254 tillgängliga adresser
@@ -41,6 +43,8 @@ Klientnätverk:
 Gäst & besök:
 10.40.1.0/26 (62 tillgängliga)
 10.40.1.1 - 10.40.1.62
+nät: 10.40.1.0
+broadcast: 10.40.1.63
 32-26=6
 2^6=64
 64-2=62 tillgängliga adresser
@@ -48,6 +52,8 @@ Gäst & besök:
 Servrar:
 10.40.1.64/27 (30)
 10.40.1.65 - 10.40.1.94
+nät: 10.40.1.64
+broadcast: 10.40.1.95
 32-27=5
 2^5=32
 32-2=30 tillgängliga adresser
@@ -55,6 +61,8 @@ Servrar:
 Drift & admin:
 10.40.1.96/28 (14)
 10.40.1.97 - 10.40.1.110
+nät: 10.40.1.96
+broadcast: 10.40.1.111
 32-28=4
 2^4=16
 16-2=14 tillgängliga adresser
@@ -62,6 +70,8 @@ Drift & admin:
 Databaser:
 10.40.1.112/29 (6)
 10.40.1.113 - 10.40.1.118
+nät: 10.40.1.112
+broadcast: 10.40.1.119
 32-29=3
 2^3=8
 8-2=6 tillgängliga adresser
@@ -69,6 +79,8 @@ Databaser:
 Logg & övervakning:
 10.40.1.120/29 (6)
 10.40.1.121 - 10.40.1.126
+nät: 10.40.1.120
+broadcast: 10.40.1.127
 32-29=3
 2^3=8
 8-2=6 tillgängliga adresser
@@ -76,6 +88,8 @@ Logg & övervakning:
 DMZ:
 10.40.1.128/29 (6)
 10.40.1.129 - 10.40.1.134
+nät: 10.40.1.128
+broadcast: 10.40.1.135
 32-29=3
 2^3=8
 8-2=6 tillgängliga adresser
@@ -83,6 +97,8 @@ DMZ:
 Länk 1:
 10.40.1.136/30 (2)
 10.40.1.137 - 10.40.1.138
+nät: 10.40.1.136
+broadcast: 10.40.1.139
 32-30=2
 2^2=4
 4-2=2 tillgängliga adresser
@@ -90,6 +106,8 @@ Länk 1:
 Länk 2:
 10.40.1.140/30 (2)
 10.40.1.141 - 10.40.1.142
+nät: 10.40.1.140
+broadcast: 10.40.1.143
 32-30=2
 2^2=4
 4-2=2 tillgängliga adresser
@@ -97,6 +115,8 @@ Länk 2:
 Länk 3:
 10.40.1.144/30 (2)
 10.40.1.145 - 10.40.1.146
+nät: 10.40.1.144
+broadcast: 10.40.1.147
 32-30=2
 2^2=4
 4-2=2 tillgängliga adresser
