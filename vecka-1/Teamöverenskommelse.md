@@ -198,7 +198,7 @@ Genom underskrifterna nedan bekräftar vi vårt gemensamma åtagande.
 Namn	Underskrift	Datum
 [Alex.o]	____________________	[2026-10-14]
 [Alex Vestelind]	____________________	[2026-10-15]
-[Namn]	____________________	[Datum]
+[Alexander Schön]	____________________	[2026-10-19]
 [Namn]	____________________	[Datum]
 [Namn]	____________________	[Datum]
 
