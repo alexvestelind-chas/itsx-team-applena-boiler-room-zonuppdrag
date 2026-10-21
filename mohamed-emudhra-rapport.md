@@ -1,7 +1,21 @@
 # Kort rapport: eMudhra
 
-eMudhra arbetar med digitala identiteter och digitala certifikat som används för att verifiera identitet och skapa förtroende i digitala tjänster.
+### Vad handlar det om?
 
-Det är viktigt att skydda digitala identiteter eftersom angripare annars kan försöka utge sig för att vara någon annan. Företag behöver därför använda säkra metoder för autentisering och kontrollera vem som får tillgång till deras system.
+eMudhra är ett företag som arbetar med digitala certifikat. Certifikat används för att kontrollera att en webbplats är äkta och säker.
 
-Min slutsats är att digital identitet och säker autentisering är viktiga delar av cybersäkerhet.
+### Vad har hänt?
+
+Några privata säkerhetsnycklar till åtta certifikat har blivit komprometterade. Det betyder att någon obehörig kan ha fått tillgång till dem.
+
+### Varför är det ett problem?
+
+Om någon använder nycklarna på fel sätt kan personen försöka låtsas vara en riktig webbplats. Det kan göra att människor luras och att säkerheten blir sämre.
+
+### Hur kan man skydda sig?
+
+Det är viktigt att uppdatera webbläsare och operativsystem så att de inte längre litar på de certifikat som har problem.
+
+### Min slutsats
+
+Jag tycker att det här visar hur viktigt det är att skydda sina säkerhetsnycklar. Om de hamnar i fel händer kan människor bli lurade. Därför måste företag ta säkerheten på allvar och uppdatera sina system.
