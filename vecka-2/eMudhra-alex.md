@@ -1,6 +1,7 @@
 # eMudhra-incidenten – konsekvenser för vår labbmiljö
 
 *Rapport · ITSX26 Kurs 2 · 21 oktober 2026*
+*Skapad av Claude AI*
 
 ## Sammanfattning
 
@@ -50,3 +51,5 @@ Detta bekräftar att Rockys paketrepo vid kontrolltillfället ännu inte hunnit 
 ## Koppling till kursens Zero Trust-principer
 
 Incidenten är ett konkret exempel på varför **implicit förtroende** är farligt (NIST SP 800-207, princip 2: all kommunikation ska säkras oavsett källa, inte bara litas på för att den kommer från en "känd" part). Ett certifikat som är tekniskt giltigt enligt kedjan visade sig ändå vara opålitligt, eftersom själva kedjans svagaste länk – nyckelgenereringen hos en enskild utfärdare – brast. Samma princip som gjorde att klienten i U3.1 kunde nå databasen bara för att den var "innanför" det interna nätet gäller här: ett certifikat ska inte litas på enbart för att det formellt verifieras mot en känd rot, utan kräver kontinuerlig övervakning och snabb reaktionsförmåga när förtroendet visar sig vara felplacerat.
+
+
