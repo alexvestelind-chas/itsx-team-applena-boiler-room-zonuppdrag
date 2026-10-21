@@ -1,0 +1,5 @@
+Det som hände var att eMudhra, ett företag som utfärdar digitala certifikat, skapade åtta certifikat med extremt svagt genererade privata nycklar. Detta innebar att vem som helst kunde återskapa nycklarna och därmed skapa falska certifikat som såg äkta ut. En angripare skulle då kunna utge sig för att vara nästan vilken webbplats eller tjänst som helst.
+
+Händelsen fick stor uppmärksamhet inom cybersäkerhetsvärlden eftersom certifikaten var betrodda av många webbläsare, operativsystem och andra tjänster. Om en angripare lyckas utnyttja sådana certifikat kan det påverka ett stort antal användare och organisationer. Problemet hos eMudhra var att de privata nycklarna hade genererats på ett felaktigt sätt, vilket gjorde dem mycket enkla att återskapa.
+
+Riskerna med detta är att angripare kan skapa falska certifikat, utge sig för att vara legitima webbplatser och genomföra så kallade Man-in-the-Middle-attacker där trafik avlyssnas eller manipuleras. En sådan händelse kan minska förtroendet för certifikatsystemet eftersom användare inte längre kan vara säkra på att en webbplats verkligen är den den utger sig för att vara.
