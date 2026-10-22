@@ -21,7 +21,7 @@
 | Gästzon | Gäst och besök | 10.40.1.0/26 |
 | Applikationszon | Applikationsserver | 10.40.1.64/27 |
 | Datazon | Kunddatabas | 10.40.1.112/29 |
-| Hanteringszon | Jump-server, loggserver | 10.40.1.96/28, 10.40.1.120/29 |
+| Hanteringszon | Jump-server, loggserver, DNS | 10.40.1.96/28, 10.40.1.120/29 |
 
 ## Vilka subnät/zoner ska nå varandra
 
