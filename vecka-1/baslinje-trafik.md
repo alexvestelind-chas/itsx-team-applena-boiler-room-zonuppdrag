@@ -1,3 +1,8 @@
+## Vad en baslinje är
+En baslinje beskriver hur normal trafik ser ut när allt fungerar som det ska.
+Den används som jämförelse för att upptäcka avvikelser, bland annat i
+incidentutredningen i vecka 8.
+
 | Källa | Mål | Protokoll | Port | Syfte | Frekvens / mönster |
 |---|---|---|---|---|---|
 | 172.20.1.145 | 172.20.1.2 | TCP | 22 | SSH – administration via jump-servern | ~24 paket, utspridda över nästan hela fångsten |
