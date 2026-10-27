@@ -4,35 +4,44 @@
 
 | Tillgång | Nivå | Motivering |
 |---|---|---|
-| Publik webbserver | Medel | Störst attackyta (internetexponerad), men lagrar ingen känslig data |
-| Applikationsserver | Medel–Hög | Länk mellan webb och databas – kan användas för att pivotera vidare |
-| Kunddatabas (personuppgifter) | Hög | GDPR-data, intrång kostar mest juridiskt och ekonomiskt |
-| Loggserver | Hög | Kritisk för att upptäcka/utreda incidenter – manipulerad logg döljer spår |
-| Jump-server (admin) | Hög | Enda vägen in för administration – intrång ger kontroll över allt |
-| Klienter (30 arbetsplatser) | Låg–Medel | Vanlig ingångsväg (nätfiske), lågt värde per enhet men många och ofta mål |
-| Gäst och besök | Låg | Isolerat segment, inget eget värde men potentiell ingångsväg om ej segmenterat |
+| Publik webbserver | Medel | Är åtkomlig från internet och har därför en större attackyta, men lagrar ingen känslig data. |
+| Applikationsserver | Medel–Hög | Kopplar ihop webbservern och databasen och kan användas för att komma vidare i nätverket vid ett intrång. |
+| Kunddatabas | Hög | Innehåller personuppgifter och behöver därför skyddas extra noga. |
+| Loggserver | Hög | Behövs för att upptäcka och utreda incidenter. |
+| Jump-server | Hög | Används för administration och behöver skyddas eftersom den ger åtkomst till andra system. |
+| Klienter | Låg–Medel | Kan vara en ingång för attacker, till exempel genom nätfiske. |
+| Gäster | Låg | Ska inte ha åtkomst till interna system och behöver därför hållas åtskilda. |
 
 ## Zontabell
 
+Team 8 använder nätverket `10.40.8.0/24`. Vi behöver därför anpassa den gamla adressplanen och använda färre zoner.
+
 | Zon | Innehåller | Nät |
 |---|---|---|
-| DMZ | Publik webbserver | 10.40.1.128/29 |
-| Klientzon | 30 arbetsplatser | 10.40.0.0/24 |
-| Gästzon | Gäst och besök | 10.40.1.0/26 |
-| Applikationszon | Applikationsserver | 10.40.1.64/27 |
-| Datazon | Kunddatabas | 10.40.1.112/29 |
-| Hanteringszon | Jump-server, loggserver | 10.40.1.96/28, 10.40.1.120/29 |
+| DMZ | Publik webbserver | Bestäms när subnäten planeras |
+| Applikations- och klientzon | Applikationsserver och klienter, om uppgiften tillåter att de ligger tillsammans | Bestäms när subnäten planeras |
+| Datazon | Kunddatabas | Bestäms när subnäten planeras |
+| Hanteringszon | Jump-server och loggserver | Bestäms när subnäten planeras |
 
-## Vilka subnät/zoner ska nå varandra
+De slutliga subnäten ska väljas så att de ryms inom `10.40.8.0/24` och inte överlappar varandra. Vi behöver också kontrollera att molnplattformens krav och uppgiften tillåter den här indelningen.
+
+## Vilka zoner ska nå varandra?
 
 | Från | Till | Tillåtet/Nekat | Motivering |
 |---|---|---|---|
-| Klientzon | DMZ | Tillåtet (specifika portar) | Normal webbanvändning |
-| DMZ | Applikationszon | Tillåtet (specifika portar) | Webbserver anropar applikationslogik |
-| Applikationszon | Datazon | Tillåtet (specifika portar) | Endast applikationslagret pratar med databasen |
-| Hanteringszon | Alla zoner | Tillåtet | Jump-server administrerar allt |
-| Alla zoner | Hanteringszon (logg) | Tillåtet | Central loggning kräver att alla skickar till loggservern |
-| Gästzon | Internet (endast) | Tillåtet | Ingen åtkomst till interna zoner |
-| Klientzon | Datazon | **Nekat** | Ingen direkt väg – ska gå via applikationslagret |
-| DMZ | Datazon | **Nekat** | Webb och data ska aldrig prata direkt |
-| Gästzon | Övriga interna zoner | **Nekat** | Gäster ska vara helt isolerade |
+| Klienter | DMZ | Tillåtet på specifika portar | Användare behöver kunna nå webbservern. |
+| DMZ | Applikationsserver | Tillåtet på specifika portar | Webbservern behöver kunna anropa applikationen. |
+| Applikationsserver | Datazon | Tillåtet på specifika portar | Applikationen behöver kunna hämta och spara data. |
+| Hanteringszon | Övriga zoner | Tillåtet för nödvändig administration | Jump-servern används för att administrera systemen. |
+| Övriga zoner | Loggserver | Tillåtet för loggtrafik | Loggar behöver samlas centralt. |
+| Klienter | Datazon | Nekat | Klienter ska inte ha direkt åtkomst till databasen. |
+| DMZ | Datazon | Nekat | Webbservern ska inte ansluta direkt till databasen. |
+| Gäster | Interna zoner | Nekat | Gäster ska inte komma åt interna system. |
+
+## Kvar att kontrollera
+
+- Bekräfta med gruppen att fyra zoner passar uppgiften.
+- Bestäm om gäster ska vara en egen zon eller inte ingå i labben.
+- Bestäm och kontrollera de exakta subnäten inom `10.40.8.0/24`.
+- Kontrollera att flödestabellen och brandväggsreglerna stämmer med zonerna.
+- Testa att tillåten trafik fungerar och att otillåten trafik blockeras.
