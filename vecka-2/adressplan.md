@@ -1,158 +1,65 @@
-## Adressplan – 10.40.0.0/16
+# Adressplan – Team 8
 
-**Förutsättningar:** Uppdragsgivarens adressutrymme är 10.40.0.0/16 (RFC 1918). Adressplanen omfattar IPv4. IPv6 är avstängt på labbservrarna och ingår inte i planen. 25 % tillväxt är inräknad på samtliga grupper utom länknät.
+## 1. Förutsättningar
 
-### Subnet cheat-sheet
+I den gamla adressplanen använde vi nätverket `10.40.0.0/16`. För vårt arbete i Team 8 har vi fått nätverket `10.40.8.0/24`, så vi behöver anpassa adressplanen till det mindre nätverket.
 
-```
-128   64   32   16   8   4   2   1   Group Size
-128   192  224  240 248 252 254 255  Subnet Mask
-/25   /26  /27  /28 /29 /30 /31 /32  CIDR
-/17   /18  /19  /20 /21 /22 /23 /24  3rd octet
-/9    /10  /11  /12 /13 /14 /15 /16  2nd octet
-/1    /2   /3   /4  /5  /6  /7  /8   1st octet
-```
+Vi utgår från den gamla adressplanen som redan är godkänd och använder samma zoner och trafikprinciper som grund. Däremot behöver vi kontrollera hur mycket adressutrymme varje zon kan få.
 
-## Data
-```
-Dela upp nätet på:
-Grupp                     Idag   Med 25 % tillväxt
-Klienter                   120   150
-Gäst och besök              40    50
-Servrar                     14    18
-Drift och administration     6     8
-Databaser                    4     5
-Logg och övervakning         3     4
-DMZ                          4     5
-Länknät mellan routrar       3 st à 2 adresser
-```
+Vi använder privata IPv4-adresser.
 
-10.40.0.0/16
-32-16=16
-2^16=65536
+## 2. Behov av adresser
 
-Klientnätverk:
-10.40.0.0/24 (254 tillgängliga adresser)
-10.40.0.1 - 10.40.0.254
-nät: 10.40.0.0
-broadcast: 10.40.0.255
-32-24=8
-2^8=256
-256-2=254 tillgängliga adresser
+Vi utgår från följande behov i den gamla adressplanen:
 
-Gäst & besök:
-10.40.1.0/26 (62 tillgängliga)
-10.40.1.1 - 10.40.1.62
-nät: 10.40.1.0
-broadcast: 10.40.1.63
-32-26=6
-2^6=64
-64-2=62 tillgängliga adresser
+| Zon | Nuvarande behov | Behov inklusive tillväxt |
+|---|---:|---:|
+| Klienter | 120 | 150 |
+| Gäster | 40 | 50 |
+| Servrar | 14 | 18 |
+| Drift och administration | 6 | 8 |
+| Databaser | 4 | 5 |
+| Loggar och övervakning | 3 | 4 |
+| DMZ | 4 | 5 |
+| Routerlänkar | 3 länkar | 2 adresser per länk |
 
-Servrar:
-10.40.1.64/27 (30)
-10.40.1.65 - 10.40.1.94
-nät: 10.40.1.64
-broadcast: 10.40.1.95
-32-27=5
-2^5=32
-32-2=30 tillgängliga adresser
+## 3. Teamets nätverk och subnät
 
-Drift & admin:
-10.40.1.96/28 (14)
-10.40.1.97 - 10.40.1.110
-nät: 10.40.1.96
-broadcast: 10.40.1.111
-32-28=4
-2^4=16
-16-2=14 tillgängliga adresser
+Teamets nätverk är `10.40.8.0/24`. Det innehåller totalt 256 adresser, men alla kan inte användas till servrar eftersom nätverksadresser, broadcastadresser och eventuellt reserverade adresser måste räknas bort.
 
-Databaser:
-10.40.1.112/29 (6)
-10.40.1.113 - 10.40.1.118
-nät: 10.40.1.112
-broadcast: 10.40.1.119
-32-29=3
-2^3=8
-8-2=6 tillgängliga adresser
+Vi behöver dela upp nätverket i mindre subnät för de zoner som ska användas i labben. Eftersom det nya nätverket är mindre än det gamla behöver vi kontrollera vilka zoner som krävs och hur många adresser varje zon behöver.
 
-Logg & övervakning:
-10.40.1.120/29 (6)
-10.40.1.121 - 10.40.1.126
-nät: 10.40.1.120
-broadcast: 10.40.1.127
-32-29=3
-2^3=8
-8-2=6 tillgängliga adresser
+De slutliga subnäten och adressintervallen ska bestämmas när vi har kontrollerat uppgiftens krav och gruppens flödestabell. Alla subnät ska ligga inom `10.40.8.0/24` och får inte överlappa varandra.
 
-DMZ:
-10.40.1.128/29 (6)
-10.40.1.129 - 10.40.1.134
-nät: 10.40.1.128
-broadcast: 10.40.1.135
-32-29=3
-2^3=8
-8-2=6 tillgängliga adresser
+## 4. Trafik mellan zonerna
 
-Länk 1:
-10.40.1.136/30 (2)
-10.40.1.137 - 10.40.1.138
-nät: 10.40.1.136
-broadcast: 10.40.1.139
-32-30=2
-2^2=4
-4-2=2 tillgängliga adresser
+Vi behåller trafikprinciperna från den gamla adressplanen:
 
-Länk 2:
-10.40.1.140/30 (2)
-10.40.1.141 - 10.40.1.142
-nät: 10.40.1.140
-broadcast: 10.40.1.143
-32-30=2
-2^2=4
-4-2=2 tillgängliga adresser
+- Klienter får ansluta till DMZ på de portar som behövs.
+- DMZ får ansluta till servrar på godkända portar.
+- Servrar får ansluta till databaser när det behövs.
+- Drift och administration ska ha åtkomst till de zoner som behövs för att sköta systemen.
+- Zonerna ska kunna skicka relevanta loggar till loggning och övervakning.
+- Gäster ska endast ha tillgång till internet och inte till interna zoner.
+- Klienter ska inte ha direkt åtkomst till databaser.
+- DMZ ska inte ha direkt åtkomst till databaser.
 
-Länk 3:
-10.40.1.144/30 (2)
-10.40.1.145 - 10.40.1.146
-nät: 10.40.1.144
-broadcast: 10.40.1.147
-32-30=2
-2^2=4
-4-2=2 tillgängliga adresser
+Brandväggsreglerna ska följa gruppens flödestabell. Trafik som inte uttryckligen tillåts ska blockeras.
 
+## 5. Kontroll och återstående arbete
 
-## Tables
+För att färdigställa adressplanen behöver vi:
 
+1. Kontrollera vilka zoner som ska ingå i kurslabben.
+2. Bestämma hur många adresser varje zon behöver i labben.
+3. Dela upp `10.40.8.0/24` i passande subnät.
+4. Kontrollera att subnäten inte överlappar varandra.
+5. Bestämma vilka IP-adresser servrarna ska använda.
+6. Jämföra adressplanen med flödestabellen.
+7. Skapa och testa nätverket när gruppen har bekräftat planen.
 
-### Adressplan
+## 6. Ändringar från den gamla adressplanen
 
-| Prefix | Syfte | Adressintervall | Ansvarig tjänst | Reserverat utrymme | Kommentar |
-|---|---|---|---|---|---|
-| 10.40.0.0/24 | Klienter | 10.40.0.1 – 10.40.0.254 | IT-drift | - | 150 av 254 i bruk, plats för vidare tillväxt |
-| 10.40.1.0/26 | Gäst och besök | 10.40.1.1 – 10.40.1.62 | IT-drift | — | Isolerat, bara internetåtkomst |
-| 10.40.1.64/27 | Servrar | 10.40.1.65 – 10.40.1.94 | Drift | — | Applikations- och filservrar |
-| 10.40.1.96/28 | Drift och administration | 10.40.1.97 – 10.40.1.110 | Drift | — | Jump-server, adminverktyg |
-| 10.40.1.112/29 | Databaser | 10.40.1.113 – 10.40.1.118 | Drift | — | Kunddatabas, personuppgifter – högst skyddad |
-| 10.40.1.120/29 | Logg och övervakning | 10.40.1.121 – 10.40.1.126 | Drift | — | Central loggning (syslog) |
-| 10.40.1.128/29 | DMZ | 10.40.1.129 – 10.40.1.134 | Drift | — | Publik webbserver |
-| 10.40.1.136/30 | Länknät 1 | 10.40.1.137 – 10.40.1.138 | Nätverk | — | Punkt-till-punkt mellan routrar |
-| 10.40.1.140/30 | Länknät 2 | 10.40.1.141 – 10.40.1.142 | Nätverk | — | Punkt-till-punkt mellan routrar |
-| 10.40.1.144/30 | Länknät 3 | 10.40.1.145 – 10.40.1.146 | Nätverk | — | Punkt-till-punkt mellan routrar |
+Den gamla adressplanen använde `10.40.0.0/16`. Den nya planen använder `10.40.8.0/24`, som är ett betydligt mindre nätverk.
 
-**Reserverat utrymme:** 10.40.1.148 – 10.40.255.255 ledigt för framtida grupper/tillväxt (merparten av /16 oanvänt).
-
-
-### Vilka subnät ska nå varandra
-
-| Från | Till | Tillåtet/Nekat | Motivering |
-|---|---|---|---|
-| Klienter | DMZ | Tillåtet (specifika portar) | Normal webbanvändning |
-| DMZ | Servrar | Tillåtet (specifika portar) | Webbserver anropar applikationslogik |
-| Servrar | Databaser | Tillåtet (specifika portar) | Endast applikationslagret pratar med databasen |
-| Drift och administration | Alla zoner | Tillåtet | Jump-server behöver kunna administrera allt |
-| Alla zoner | Logg och övervakning | Tillåtet | Central loggning kräver att alla skickar till loggservern |
-| Gäst och besök | Internet (endast) | Tillåtet | Ingen åtkomst till interna zoner |
-| Klienter | Databaser | **Nekat** | Ingen direkt väg – ska gå via applikationslagret |
-| DMZ | Databaser | **Nekat** | Webb och data ska aldrig prata direkt |
-| Gäst och besök | Övriga interna zoner | **Nekat** | Gäster ska vara helt isolerade |
+Vi behåller samma grundläggande zonindelning och trafikprinciper, men adressfördelningen behöver anpassas till kurslabben. Därför behöver vi kontrollera vilka zoner och adressbehov som ska prioriteras innan vi fastställer de slutliga subnäten.
