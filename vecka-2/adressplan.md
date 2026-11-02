@@ -2,64 +2,61 @@
 
 ## 1. Förutsättningar
 
-I den gamla adressplanen använde vi nätverket `10.40.0.0/16`. För vårt arbete i Team 8 har vi fått nätverket `10.40.8.0/24`, så vi behöver anpassa adressplanen till det mindre nätverket.
+Team 8 har fått nätverket `10.40.8.0/24` för arbetet i kurslabben.
 
-Vi utgår från den gamla adressplanen som redan är godkänd och använder samma zoner och trafikprinciper som grund. Däremot behöver vi kontrollera hur mycket adressutrymme varje zon kan få.
+Vi använder privata IPv4-adresser och delar upp nätverket i fyra subnät. Varje subnät representerar en egen zon med en särskild funktion.
 
-Vi använder privata IPv4-adresser.
+## 2. Teamets nätverk och subnät
 
-## 2. Behov av adresser
+Teamets privata nätverk är `10.40.8.0/24`.
 
-Vi utgår från följande behov i den gamla adressplanen:
+Vi har skapat följande fyra subnät:
 
-| Zon | Nuvarande behov | Behov inklusive tillväxt |
-|---|---:|---:|
-| Klienter | 120 | 150 |
-| Gäster | 40 | 50 |
-| Servrar | 14 | 18 |
-| Drift och administration | 6 | 8 |
-| Databaser | 4 | 5 |
-| Loggar och övervakning | 3 | 4 |
-| DMZ | 4 | 5 |
-| Routerlänkar | 3 länkar | 2 adresser per länk |
+| Zon | Subnät | Antal adresser totalt |
+|---|---|---:|
+| Klientzon | `10.40.8.0/27` | 32 |
+| Serverzon | `10.40.8.32/27` | 32 |
+| Datazon | `10.40.8.64/28` | 16 |
+| Hanteringszon | `10.40.8.80/28` | 16 |
 
-## 3. Teamets nätverk och subnät
+Alla fyra subnät ligger inom `10.40.8.0/24` och överlappar inte varandra.
 
-Teamets nätverk är `10.40.8.0/24`. Det innehåller totalt 256 adresser, men alla kan inte användas till servrar eftersom nätverksadresser, broadcastadresser och eventuellt reserverade adresser måste räknas bort.
+## 3. Zonernas funktion
 
-Vi behöver dela upp nätverket i mindre subnät för de zoner som ska användas i labben. Eftersom det nya nätverket är mindre än det gamla behöver vi kontrollera vilka zoner som krävs och hur många adresser varje zon behöver.
+- **Klientzon:** För klienter och användarnas datorer.
+- **Serverzon:** För webbserver och applikationsserver.
+- **Datazon:** För databaser och lagring av verksamhetsdata.
+- **Hanteringszon:** För administration, drift och hantering av servrar.
 
-De slutliga subnäten och adressintervallen ska bestämmas när vi har kontrollerat uppgiftens krav och gruppens flödestabell. Alla subnät ska ligga inom `10.40.8.0/24` och får inte överlappa varandra.
+Loggning och övervakning hanteras inom den planerade hanteringsfunktionen. Den exakta placeringen behöver stämmas av med gruppens lösning.
 
 ## 4. Trafik mellan zonerna
 
-Vi behåller trafikprinciperna från den gamla adressplanen:
+Vi använder principen att endast nödvändig trafik ska tillåtas.
 
-- Klienter får ansluta till DMZ på de portar som behövs.
-- DMZ får ansluta till servrar på godkända portar.
-- Servrar får ansluta till databaser när det behövs.
-- Drift och administration ska ha åtkomst till de zoner som behövs för att sköta systemen.
-- Zonerna ska kunna skicka relevanta loggar till loggning och övervakning.
-- Gäster ska endast ha tillgång till internet och inte till interna zoner.
+- Klientzon får ansluta till tjänster i Serverzon på godkända portar.
+- Serverzon får kommunicera med Datazon när applikationen behöver det.
+- Hanteringszon får administrera servrar och databaser via godkända anslutningar.
+- Servrar ska kunna skicka relevanta loggar till loggmottagningen.
 - Klienter ska inte ha direkt åtkomst till databaser.
-- DMZ ska inte ha direkt åtkomst till databaser.
+- Trafik som inte uttryckligen tillåts ska blockeras.
 
-Brandväggsreglerna ska följa gruppens flödestabell. Trafik som inte uttryckligen tillåts ska blockeras.
+## 5. Kontroll och verifiering
 
-## 5. Kontroll och återstående arbete
+Vi ska kontrollera att:
 
-För att färdigställa adressplanen behöver vi:
-
-1. Kontrollera vilka zoner som ska ingå i kurslabben.
-2. Bestämma hur många adresser varje zon behöver i labben.
-3. Dela upp `10.40.8.0/24` i passande subnät.
-4. Kontrollera att subnäten inte överlappar varandra.
-5. Bestämma vilka IP-adresser servrarna ska använda.
-6. Jämföra adressplanen med flödestabellen.
-7. Skapa och testa nätverket när gruppen har bekräftat planen.
+1. Alla fyra subnäten är skapade.
+2. Subnäten ligger inom `10.40.8.0/24`.
+3. Subnäten inte överlappar varandra.
+4. Servrarna är anslutna till rätt subnät.
+5. Flödestabellen stämmer med zonindelningen.
+6. Brandväggsreglerna följer flödestabellen.
+7. Trafiken testas och dokumenteras.
 
 ## 6. Ändringar från den gamla adressplanen
 
-Den gamla adressplanen använde `10.40.0.0/16`. Den nya planen använder `10.40.8.0/24`, som är ett betydligt mindre nätverk.
+Den gamla adressplanen använde `10.40.0.0/16`. Teamets nya nätverk är `10.40.8.0/24`.
 
-Vi behåller samma grundläggande zonindelning och trafikprinciper, men adressfördelningen behöver anpassas till kurslabben. Därför behöver vi kontrollera vilka zoner och adressbehov som ska prioriteras innan vi fastställer de slutliga subnäten.
+Vi har anpassat adressplanen till fyra zoner: Klientzon, Serverzon, Datazon och Hanteringszon.
+
+Den tidigare zonindelningen med bland annat DMZ, applikationszon, gästzon och loggzon har ersatts av den nya fyrzonsindelningen. Funktionerna behöver hanteras inom den nya strukturen enligt gruppens beslut.
