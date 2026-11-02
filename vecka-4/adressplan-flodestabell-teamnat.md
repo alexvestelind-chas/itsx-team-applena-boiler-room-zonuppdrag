@@ -17,7 +17,7 @@
 |---|---|---|---|---|---|---|---|
 | F1 | Klientzon (10.40.8.0/27) | DMZ (10.40.8.32/27) | tcp | 443 | Inkommande (till DMZ) | Klienter når webbportalen | Värd (eth2) |
 | F2 | DMZ (10.40.8.32/27) | Applikationszon (10.40.8.64/28) | tcp | 8080 | Inkommande (till App) | Portalen hämtar data från applikationslogiken | Värd (eth2) |
-| F3 | Applikationszon (10.40.8.64/28) | Datazon (10.40.8.80/28) | tcp | 443 | Inkommande (till Data) | Appen läser och skriver data | Värd (eth2) |
+| F3 | Applikationszon (10.40.8.64/28) | Datazon (10.40.8.80/28) | tcp | 5432 | Inkommande (till Data) | Appen läser och skriver data | Värd (eth2) |
 
 ### Driftflöden (D1–D7) – gäller varje server oavsett zon
 
