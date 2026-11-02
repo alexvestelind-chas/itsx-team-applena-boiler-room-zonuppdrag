@@ -4,7 +4,7 @@
 
 Flödestabellen beskriver vilken trafik som får skickas mellan zonerna i Team 8:s privata nätverk.
 
-Nätverket är `10.40.8.0/24` och är uppdelat i fyra zoner:
+Teamets nätverk är `10.40.8.0/24` och är uppdelat i fyra zoner:
 
 - Klientzon: `10.40.8.0/27`
 - Serverzon: `10.40.8.32/27`
@@ -15,38 +15,49 @@ Målet är att endast tillåta trafik som behövs för verksamheten. All annan t
 
 ## 2. Flödestabell
 
-| Rad | Källzon | Målzon | Protokoll | Port | Riktning | Motivering | Filtreras var |
-|---|---|---|---|---:|---|---|---|
-| 1 | Internet | Serverzon (webbserver) | TCP | 443 | In | Användare ska kunna nå webbapplikationen via HTTPS. | Molnplattform |
-| 2 | Klientzon | Serverzon (webbserver) | TCP | 443 | Ut | Anställda ska kunna använda webbapplikationen. | Värd |
-| 3 | Serverzon (webbserver) | Serverzon (applikationsserver) | TCP | 443 | Ut | Webbservern skickar förfrågningar till applikationsservern. | Värd |
-| 4 | Serverzon (applikationsserver) | Datazon | TCP | 3306 | Ut | Applikationsservern behöver läsa och skriva kunddata i databasen. | Värd |
-| 5 | Hanteringszon | Serverzon (webbserver) | TCP | 22 | Ut | Administratörer behöver hantera webbservern via SSH. | Värd |
-| 6 | Hanteringszon | Serverzon (applikationsserver) | TCP | 22 | Ut | Administratörer behöver hantera applikationsservern via SSH. | Värd |
-| 7 | Hanteringszon | Datazon | TCP | 22 | Ut | Administratörer behöver hantera databasservern via SSH. | Värd |
-| 8 | Serverzon och Datazon | Hanteringszon | TCP/UDP | 514 | Ut | Servrar skickar loggar till loggmottagningen. | Värd |
-| 9 | Alla zoner | Alla zoner | – | – | In/Ut | All trafik som inte uttryckligen tillåts ska nekas. | Molnplattform och värd |
+| Flöde | Källzon | Målzon | Protokoll | Port | Riktning | Motivering | Filtreras var |
+|---|---|---|---|---|---|---|---|
+| F1 | Klientzon | DMZ (webbserver) | TCP | 443 | In | Klienter ska kunna använda webbapplikationen via HTTPS. | Värd |
+| F2 | DMZ (webbserver) | App (applikationsserver) | TCP | 443 | In | Webbservern ska kunna skicka förfrågningar till applikationsservern. | Värd |
+| F3 | App (applikationsserver) | Databas | TCP | 3306 | In | Applikationsservern ska kunna läsa och skriva kunddata i databasen. | Värd |
 
-## 3. Beskrivning av flödena
+## 3. Driftregler
 
-- **Rad 1:** Tillåter HTTPS-trafik från internet till webbservern på TCP-port 443.
-- **Rad 2:** Tillåter klienter att använda webbapplikationen via HTTPS.
-- **Rad 3:** Tillåter webbservern att kommunicera med applikationsservern.
-- **Rad 4:** Tillåter applikationsservern att ansluta till databasen på TCP-port 3306.
-- **Rad 5–7:** Tillåter administratörer i hanteringszonen att använda SSH för att sköta servrar och databas.
-- **Rad 8:** Tillåter servrar och databaser att skicka loggar till hanteringszonen.
-- **Rad 9:** All trafik som inte uttryckligen tillåts ska blockeras.
+Utöver F1–F3 behöver följande drifttrafik tillåtas enligt uppgiftens krav:
 
-## 4. Säkerhetsprinciper
+| Regel | Källzon | Målzon | Protokoll | Port | Funktion |
+|---|---|---|---|---|---|
+| D1 | Hanteringszon | Servrar | TCP | 22 | SSH-administration från jump-servern |
+| D2 | Hanteringszon | Servrar | TCP | 22 | SSH-administration från CTF |
+| D3 | Servrar | DNS-servrar | UDP/TCP | 53 | DNS-uppslagning |
+| D4 | Servrar | NTP-server | UDP | 123 | Tidssynkronisering |
+| D5 | Servrar | Loggserver | TCP | 514 | Skicka loggar |
+| D6 | DHCP-server | Servrar | UDP | 67/68 | Tilldelning och förnyelse av IP-adresser |
+| D7 | Servrar | Internet | TCP | Kontrollera uppgiftens krav | Paketuppdateringar |
 
-Vi använder principen **default deny**. Det innebär att trafik som inte uttryckligen har tillåtits ska blockeras.
+De exakta adresserna och riktningarna för D1–D7 ska följa kursens driftinstruktioner.
 
-Brandväggsreglerna ska dokumenteras så att varje regel kan kopplas till rätt rad i flödestabellen.
+## 4. Beskrivning av flödena
 
-## 5. Saker att kontrollera med gruppen
+- **F1:** Klientzonen får ansluta till webbservern via HTTPS på TCP-port 443.
+- **F2:** Webbservern får skicka förfrågningar till applikationsservern.
+- **F3:** Applikationsservern får ansluta till databasen på TCP-port 3306.
+- **D1–D7:** Driftreglerna behövs för administration, DNS, tidssynkronisering, loggning, DHCP och paketuppdateringar.
 
-1. Ska webbservern och applikationsservern vara två separata servrar i Serverzon?
-2. Ska gäster ingå i kurslabben, eller ska Gästzon inte användas?
-3. Ska loggservern finnas i Hanteringszon?
-4. Behöver webbservern vara nåbar från internet på TCP-port 443?
-5. Vilka exakta serveradresser ska användas för respektive flöde?
+## 5. Säkerhetsprinciper
+
+Vi använder principen **default deny**. Det innebär att all trafik som inte uttryckligen tillåts ska blockeras.
+
+Brandväggsreglerna ska dokumenteras med rätt regel-ID så att varje regel kan kopplas till rätt rad i flödestabellen.
+
+Molnplattformens brandvägg filtrerar trafik på det publika gränssnittet. Trafik mellan servrar och interna zoner filtreras med nftables på respektive server.
+
+## 6. Kontroll och verifiering
+
+Vi ska kontrollera att:
+
+1. F1, F2 och F3 fungerar som planerat.
+2. D1–D7 är korrekt konfigurerade.
+3. Otillåten trafik blockeras.
+4. Brandväggsreglerna finns kvar efter omstart.
+5. Testresultaten dokumenteras och kan kopplas till rätt regel-ID.
