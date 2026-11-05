@@ -18,10 +18,19 @@ Team 8 använder nätverket `10.40.8.0/24`. Vi behöver därför anpassa den gam
 
 | Zon | Innehåller | Nät |
 |---|---|---|
+<<<<<<< HEAD
 | DMZ | Publik webbserver | Bestäms när subnäten planeras |
 | Applikations- och klientzon | Applikationsserver och klienter, om uppgiften tillåter att de ligger tillsammans | Bestäms när subnäten planeras |
 | Datazon | Kunddatabas | Bestäms när subnäten planeras |
 | Hanteringszon | Jump-server och loggserver | Bestäms när subnäten planeras |
+=======
+| DMZ | Publik webbserver | 10.40.1.128/29 |
+| Klientzon | 30 arbetsplatser | 10.40.0.0/24 |
+| Gästzon | Gäst och besök | 10.40.1.0/26 |
+| Applikationszon | Applikationsserver | 10.40.1.64/27 |
+| Datazon | Kunddatabas | 10.40.1.112/29 |
+| Hanteringszon | Jump-server, loggserver, DNS | 10.40.1.96/28, 10.40.1.120/29 |
+>>>>>>> alex_vestelind
 
 De slutliga subnäten ska väljas så att de ryms inom `10.40.8.0/24` och inte överlappar varandra. Vi behöver också kontrollera att molnplattformens krav och uppgiften tillåter den här indelningen.
 
