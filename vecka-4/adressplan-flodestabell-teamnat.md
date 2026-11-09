@@ -27,7 +27,7 @@
 | D2 | CTF-server (172.20.1.10) | Egen server (alla zoner) | tcp | 22 | Inkommande | Kursens kontrolltjänst | Värd (eth1) |
 | D3 | Egen server (alla zoner) | Hetzners DNS-resolvrar (185.12.64.1, 185.12.64.2) | udp/tcp | 53 | Utgående | Namnuppslag – molnbrandväggen släpper alltid dessa, men krävs även på värden | Värd (eth0) + molnbrandvägg |
 | D4 | Egen server (alla zoner) | Internet | udp | 123 | Utgående | Tidssynk (chrony) | Värd (eth0) + molnbrandvägg |
-| D5 | Egen server (alla zoner) | Loggserver (172.20.1.58) | tcp | 514 | Utgående | Brandväggsloggen till loggservern | Värd (eth1) |
+| D5 | Egen server (alla zoner) | Loggserver (172.20.1.58) | tcp | 6514 | Utgående | Loggar till loggservern över TLS (RFC 5425, MCFFS 2026:11 4 kap. 25 §). Ersätter klartext på 514 från vecka 4, som stängs. | Värd (eth1) |
 | D6 | Egen server (alla zoner) | DHCP-servern (172.31.1.1 på eth0, 172.20.0.1 på eth1, 10.40.8.1 på eth2) | udp | 68→67 | Utgående | Förnyelse av serverns adresser – utan regeln tappas de när lånet (24h) går ut | Värd (samtliga gränssnitt) |
 
 **Allt som inte står ovan är nekat, inkommande och utgående.**
