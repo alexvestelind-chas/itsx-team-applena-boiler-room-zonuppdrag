@@ -19,15 +19,15 @@ Urval: `*.info;mail.none;cron.none` via `/etc/rsyslog.d/70-central-tls.conf`
 | Paketinstallation (dnf) | `/var/log/dnf.log` | `2026-11-04T06:16:44+0000 DDEBUG Cleaning up.` | Ingen av fråga 1–5 (struken) | dnf egen rotation (`dnf.log.1`) | oklart (`dnf.log.1` är ca 1 MB) | ISO 8601 med tidszon (`+0000`) |
 | Webbserver | `/var/log/httpd/access_log`, `error_log` | `[Sun Nov 01 00:00:08.719193 2026] [mpm_event:notice] [pid 17245:tid 17245] AH00489: Apache/2.4.62 (Rocky Linux) configured -- resuming normal operations` (error_log) | Ingen av fråga 1–5 (struken) | weekly, rotate 4 | ca 4 veckor | `[Sun Nov 01 00:00:08.719193 2026]`: veckodag, mikrosekunder och år, ingen tidszon |
 
-Obs (audit): `sudo auditctl -l` ger `No rules`, alltså inga egna regler. Audit loggar bara standardhändelser (inloggning, sudo-autentisering), inte kommandon (EXECVE). Regel för root-kommandon läggs i U5.3.
+Obs (audit): före U5.3 gav `sudo auditctl -l` `No rules`, så audit loggade bara standardhändelser (inloggning, sudo-autentisering), inte kommandon (EXECVE). Sedan 8 nov 22:27 UTC finns regeln i `/etc/audit/rules.d/rootcmd.rules` (`-a always,exit -F arch=b64 -S execve -F euid=0 -k rootcmd`, plus b32), och posterna skickas centralt via audit-pluginet (`audispd-plugins`, `active = yes` i `/etc/audit/plugins.d/syslog.conf`).
 
 ## 2. Fem frågor och urval
 
 | Fråga (tidsspann, subjekt, vad som ska fastställas) | Källor som krävs | Går att besvara idag? |
 |---|---|---|
 | 1. Vem loggade in via SSH på elev-39 den 4 nov omkring 07:32, från vilka adresser, och var det en eller flera sessioner? | `secure` (`session opened` 07:32:17, `Accepted password for student from 10.40.8.65` 07:32:47), `wtmp` (`last`: `pts/1` från 172.20.1.2 och `pts/3` från 10.40.8.65), `messages` (`systemd-logind: New session 105 of user student`) | **Ja.** Båda inloggningarna syns: första sessionen via jump (172.20.1.2), andra från elev-39:s egen teamnätsadress (10.40.8.65). Tidszon kontrollerad: servern går på UTC och klockan är synkad (`timedatectl`: Etc/UTC, synchronized: yes), samma som loggservern. |
-| 2. Vilka kommandon körde samma session (session 105) som root, och vilket konto stod bakom (`auid`)? | `audit.log` (SYSCALL/EXECVE, `ses=105`, `auid=1000`), `secure` (sudo-rader) | **Delvis.** Audit visar sudo-händelser för session 105 (`ses=105 auid=1000`), men `auditctl -l` ger `No rules`, så själva kommandona (EXECVE) loggas inte än. De syns i stället som sudo-rader i `secure`. Regel läggs i U5.3. |
-| 3. Vilka kommandon körde användare som root (via sudo) på elev-39 den 4 nov mellan 07:00 och 08:00, vilket konto stod bakom varje kommando och vilket kommando var det? | `secure` (sudo-rader med `COMMAND=`), `audit.log` (SYSCALL/EXECVE med `auid`) | **Ja.** Sudo-raderna i `secure` visar konto, terminal och kommando: `Nov  2 09:43:13 elev-39 sudo[84460]: student : TTY=pts/3 ; PWD=/home/student ; USER=root ; COMMAND=/bin/nano zon.nft`. Fullständig EXECVE-spårning med `auid` kräver audit-regeln (U5.3). |
+| 2. Vilka kommandon körde samma session (session 105) som root, och vilket konto stod bakom (`auid`)? | `audit.log` (SYSCALL/EXECVE, `ses=105`, `auid=1000`), `secure` (sudo-rader) | **Delvis för session 105, ja framåt.** Session 105 (4 nov) kom före audit-regeln, så där visar audit bara sudo-händelser (`ses=105 auid=1000`), och själva kommandona syns som sudo-rader i `secure`. Sedan 8 nov 22:27 UTC loggar regeln alla root-kommandon (EXECVE med `auid`, nyckel `rootcmd`) och de når loggservern. |
+| 3. Vilka kommandon körde användare som root (via sudo) på elev-39 den 4 nov mellan 07:00 och 08:00, vilket konto stod bakom varje kommando och vilket kommando var det? | `secure` (sudo-rader med `COMMAND=`), `audit.log` (SYSCALL/EXECVE med `auid`) | **Ja.** Sudo-raderna i `secure` visar konto, terminal och kommando: `Nov  2 09:43:13 elev-39 sudo[84460]: student : TTY=pts/3 ; PWD=/home/student ; USER=root ; COMMAND=/bin/nano zon.nft`. Fullständig EXECVE-spårning med `auid` finns sedan 8 nov (audit-regeln från U5.3), men inte bakåt i tiden. |
 | 4. Blockerades något utgående mot port 443 från elev-39 den 1 nov, när, och till vilken adress? | `ZON-UT-DROP` i `messages` (kernel) eller `journalctl -k -g ZON-` | **Ja.** Exempelrad finns (1 nov 02:38:45, mål 146.75.122.132:443). Förbehåll: loggregeln har `limit rate`, så alla paket loggas inte, men *att* det blockerades syns. |
 | 5. Slutade någon server skicka loggar under dygnet 3 nov, vilken, och när var den sista raden per server? | loggservern (`loggsök` på jump): senaste tidsstämpel per avsändare | **Delvis.** Min egen server skickar nu över TLS, så jag kan se när min senaste rad kom (`loggsök`). Jag kan inte jämföra andra servrar, eftersom jag bara ser mina egna rader. |
 
@@ -48,6 +48,7 @@ Obs (audit): `sudo auditctl -l` ger `No rules`, alltså inga egna regler. Audit 
 | spar588dcf35 (U5.1) | 2026-11-05 09:48 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök spar588dcf35` | Ja, kanal TLS | Nej |
 | efter-stangning-514 | 2026-11-05 10:16 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök efter-stangning-514` | Ja, kanal TLS | Nej. Klartextflödet (514) var då avstängt. |
 | spar06c2a727 (U5.2) | 2026-11-05 10:51:54 | elev-39 | logger (tagg kotest) | `loggsök spar06c2a727` | Ja, kanal TLS | Ja. Kom 280 s efter att den skapades (avsiktligt avbrott). Tidsstämpeln är den ursprungliga. |
+| spare5efe8f8 (U5.3) | 2026-11-08 22:28 | elev-39 | auditd (`sudo /usr/bin/touch /tmp/spare5efe8f8`, via audit-pluginet) | `loggsök spare5efe8f8` | Ja, kontrollen godkändes och visade `auid=student` | Nej |
 
 ## 4. Skyddsbeskrivning
 
@@ -97,7 +98,7 @@ queue.saveOnShutdown="on"
 
 **Hen ändrar klockan eller skickar falska rader.** Meddelandets tidsstämpel kommer från min servers klocka och kan manipuleras, men loggservern sätter egen mottagningstid (`mottaget ...Z`), så en avvikelse blir synlig. Falska rader kan hen skicka från min adress, men hen kan inte ta bort de riktiga.
 
-**Vad kedjan inte fångar:** händelser mellan att hen tar över kontot och att något loggas, samt allt som sker medan loggningen är avstängd. `audit.log` skickas inte vidare än (`loggsök type=USER_START` gav inga rader), eftersom audit-pluginet läggs till i U5.3. Och en admin på loggservern kan ändra där, vilket jag som elev inte kan verifiera.
+**Vad kedjan inte fångar:** händelser mellan att hen tar över kontot och att något loggas, samt allt som sker medan loggningen är avstängd. Audit-posterna skickas sedan U5.3 vidare via audit-pluginet, men bara för händelser efter 8 nov 22:27 UTC. Och en angripare med root kan stoppa `auditd` eller ändra reglerna (`auditctl -D`), vilket syns som tystnad centralt. Och en admin på loggservern kan ändra där, vilket jag som elev inte kan verifiera.
 
 ## 5. Flödestabell, ändringar för loggflödet
 
@@ -111,7 +112,8 @@ Rad-numren följer inte teamets numrering ännu. Sätt rätt nummer när flödes
 
 ## 6. Öppna punkter
 
-- `audit.log` skickas inte centralt än. Regel och `audispd-plugins` läggs i U5.3.
+- Audit skickas centralt sedan U5.3 (regel + `audispd-plugins`). Verifierat med `kontrollera U5.3` och `ausearch --input-logs -k rootcmd`.
+- Omstartstest av servern är inte gjort än (nftables, rsyslog och auditd är konfigurerade att starta automatiskt, men det är inte verifierat med en riktig omstart).
 - Webbserverloggen, cron och dnf samlas inte in (strukna enligt avsnitt 2).
 - Journalen ligger bara i minnet och försvinner vid omstart.
 - Central lagringstid är okänd. Fråga Peter.
@@ -120,4 +122,4 @@ Rad-numren följer inte teamets numrering ännu. Sätt rätt nummer när flödes
 
 ## AI-not
 
-Alla utskrifter och exempelrader kommer från min egen server (elev-39) och från jump, där jag körde kommandona själv. Claude hjälpte till med struktur, förklarade kedjan, föreslog kommandon och tester (sudo-testet och sökningen efter audit-rader) och skrev utkast till texten under 4.1, 4.2, 4.4 och scenariot samt till rader i avsnitt 5. Frågekolumnen i loggkällekartan skrev jag själv, med små språkliga justeringar, och fråga 3–5 samt formuleringarna under *Strukna källor* föreslogs av Claude och granskades av mig. Rubrikstrukturen följer ett kamratexempel (elev-32:s fil), men innehållet är mitt eget. Uppgiften om rsyslogs gräns (`timeoutEnqueue`) kommer från rsyslogs dokumentation och är inte testad.
+Alla utskrifter och exempelrader kommer från min egen server (elev-39) och från jump, där jag körde kommandona själv. Claude hjälpte till med struktur, förklarade kedjan, föreslog kommandon och tester (sudo-testet och sökningen efter audit-rader) och skrev utkast till texten under 4.1, 4.2, 4.4 och scenariot samt till rader i avsnitt 5. Claude guidade mig också genom U5.3 (audit-regel och audit-plugin), där jag körde alla kommandon själv och kontrollerade utskrifterna. Frågekolumnen i loggkällekartan skrev jag själv, med små språkliga justeringar, och fråga 3–5 samt formuleringarna under *Strukna källor* föreslogs av Claude och granskades av mig. Rubrikstrukturen följer ett kamratexempel (elev-32:s fil), men innehållet är mitt eget. Uppgiften om rsyslogs gräns (`timeoutEnqueue`) kommer från rsyslogs dokumentation och är inte testad.
