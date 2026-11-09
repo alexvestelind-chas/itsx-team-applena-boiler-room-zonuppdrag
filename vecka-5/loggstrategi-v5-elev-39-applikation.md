@@ -48,7 +48,7 @@ Obs (audit): före U5.3 gav `sudo auditctl -l` `No rules`, så audit loggade bar
 | spar588dcf35 (U5.1) | 2026-11-05 09:48 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök spar588dcf35` | Ja, kanal TLS | Nej |
 | efter-stangning-514 | 2026-11-05 10:16 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök efter-stangning-514` | Ja, kanal TLS | Nej. Klartextflödet (514) var då avstängt. |
 | spar06c2a727 (U5.2) | 2026-11-05 10:51:54 | elev-39 | logger (tagg kotest) | `loggsök spar06c2a727` | Ja, kanal TLS | Ja. Kom 280 s efter att den skapades (avsiktligt avbrott). Tidsstämpeln är den ursprungliga. |
-| U5-omstart-efter3 (omstartstest) | 2026-11-09 07:48 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök U5-omstart-efter3` | Ja, kanal TLS | Ja. Markörerna `efter` (07:39) och `efter2` (07:43) kom inte fram: rsyslogs `imjournal` kastade dem när gränsen på 20 000 meddelanden per 600 s nåddes. Markören `U5-omstart-fore` (07:34:44, före omstarten) kom fram. |
+| U5-omstart-efter3 (omstartstest) | 2026-11-09 07:48 | elev-39 | logger (user.notice, tagg sparbarhet) | `loggsök U5-omstart-efter3` | Ja, kanal TLS | Ja. Markörerna `efter` (07:39) och `efter2` (07:43) kom inte fram: rsyslog loggade `imjournal: 4089 messages lost due to rate-limiting (20000 allowed within 600 seconds)` kl 07:46. Markören `U5-omstart-fore` (07:34:44, före omstarten) kom fram, liksom `efter3` efter att tidsfönstret passerat. |
 | spare5efe8f8 (U5.3) | 2026-11-08 22:28 | elev-39 | auditd (`sudo /usr/bin/touch /tmp/spare5efe8f8`, via audit-pluginet) | `loggsök spare5efe8f8` | Ja, kontrollen godkändes och visade `auid=student` | Nej |
 
 ## 4. Skyddsbeskrivning
@@ -100,7 +100,7 @@ queue.saveOnShutdown="on"
 
 **Hen ändrar klockan eller skickar falska rader.** Meddelandets tidsstämpel kommer från min servers klocka och kan manipuleras, men loggservern sätter egen mottagningstid (`mottaget ...Z`), så en avvikelse blir synlig. Falska rader kan hen skicka från min adress, men hen kan inte ta bort de riktiga.
 
-**Vad kedjan inte fångar:** händelser mellan att hen tar över kontot och att något loggas, samt allt som sker medan loggningen är avstängd. Audit-posterna skickas sedan U5.3 vidare via audit-pluginet, men bara för händelser efter 8 nov 22:27 UTC. Och en svaghet jag hittade vid omstartstestet: `imjournal` har en gräns på 20 000 meddelanden per 600 s (`4089 messages lost due to rate-limiting`, 9 nov 07:46), och audit-regeln för root-kommandon genererar många poster. En angripare med root kan därför översvämma loggen och få senare händelser kastade innan de når kön. Och en angripare med root kan stoppa `auditd` eller ändra reglerna (`auditctl -D`), vilket syns som tystnad centralt. Och en admin på loggservern kan ändra där, vilket jag som elev inte kan verifiera.
+**Vad kedjan inte fångar:** händelser mellan att hen tar över kontot och att något loggas, samt allt som sker medan loggningen är avstängd. Audit-posterna skickas sedan U5.3 vidare via audit-pluginet, men bara för händelser efter 8 nov 22:27 UTC. Och en svaghet jag hittade vid omstartstestet: rsyslogs `imjournal` har en standardgräns på 20 000 meddelanden per 600 s och kastade 4089 meddelanden (9 nov 07:46), däribland mina testmarkörer. Mekanismen är i princip utnyttjingsbar: den som kan generera många loggposter kan få senare händelser kastade innan de når kön. Orsaken till just min överskridning är inte fastställd (se öppna punkter). Och en angripare med root kan stoppa `auditd` eller ändra reglerna (`auditctl -D`), vilket syns som tystnad centralt. Och en admin på loggservern kan ändra där, vilket jag som elev inte kan verifiera.
 
 ## 5. Flödestabell, ändringar för loggflödet
 
@@ -116,7 +116,7 @@ Rad-numren följer inte teamets numrering ännu. Sätt rätt nummer när flödes
 
 - Audit skickas centralt sedan U5.3 (regel + `audispd-plugins`). Verifierat med `kontrollera U5.3` och `ausearch --input-logs -k rootcmd`.
 - Omstartstest gjort 9 nov: brandväggsregler, audit-regler och tjänsterna (nftables, rsyslog, auditd) kom upp av sig själva, och loggningen fungerade igen efter ca 2 minuter.
-- `imjournal` kastar meddelanden när gränsen på 20 000 per 600 s nås (audit-regeln ger många poster). Beslut behövs: höja gränsen (`Ratelimit.Burst`) eller minska bruset från audit-regeln, till exempel genom att filtrera bort rutinkommandon.
+- `imjournal` kastade 4089 meddelanden efter omstarten (gräns 20 000 per 600 s, standardvärden). Mätningar 9 nov, 07:36–07:46 UTC: 10 982 auditposter (`ausearch`), 13 067 journalrader totalt, 1 rad med `_TRANSPORT=audit` (journald samlar alltså inte in audit själv), 3 405 `SYSCALL`-poster med nyckeln `rootcmd` sedan uppstart. Siffrorna når inte 20 000, så orsaken är inte fullständigt förklarad; en möjlig förklaring är att `imjournal` läste om poster när journalfilerna ändrades (`journal files changed, reloading` vid uppstart). Elev-45 (audit på, standard-`imjournal`, ca 2 983 `SYSCALL`-poster sedan uppstart) såg inget rate-limiting. Beslut behövs: höja gränsen (`Ratelimit.Burst`) eller utreda orsaken vidare.
 - Webbserverloggen, cron och dnf samlas inte in (strukna enligt avsnitt 2).
 - Journalen ligger bara i minnet och försvinner vid omstart.
 - Central lagringstid är okänd. Fråga Peter.
