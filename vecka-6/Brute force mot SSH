@@ -1,0 +1,47 @@
+Playbook: Brute force mot SSH
+
+Detektion: Min Alerting-monitor för brute force (rule.groups: authentication_failed, körs varje minut). Regel 5712 larmar efter åtta misslyckade inloggningar från samma källa.
+ATT&CK: T1110 Brute Force (taktik Credential Access).
+Normalnivå: Jag mätte regel 5712 på elev-32 till 1 träff på 31 minuter i normaltrafik (08:06-08:37).
+
+Fas 1: Förberedelse
+Jag kontrollerar i Alerting → Monitors att brute force-monitorn är Enabled.
+Jag kontrollerar att wazuh-alerts-* finns i Discover.
+Jag har normalnivån ovan till hands som jämförelse.
+Fas 2: Detektion och analys
+Jag öppnar larmet i Alerting → Alerts och noterar starttiden.
+Jag söker i Discover (wazuh-alerts-*) över 15 minuter före och efter larmet:
+rule.id: 5712
+
+Jag noterar data.srcip, data.srcuser och location.
+3. Jag söker på samma data.srcip utan filter på location, för att se om andra servrar också träffades:
+
+data.srcip: <adressen>
+Jag räknar antalet olika data.srcuser. Många olika användarnamn från en källa är typiskt för brute force.
+Jag söker efter en lyckad inloggning från samma källa:
+data.srcip: <adressen> and rule.groups: authentication_success
+
+Regel 40112 (nivå 12) betyder att misslyckade försök följdes av en lyckad inloggning.
+6. Jag skriver en post i triageloggen med observation och slutsats i skilda fält, och svarar på: vad hände, vad berördes, vad ska göras.
+
+Fas 3: Begränsning, utrotning och återställning
+Om ingen lyckad inloggning finns lägger jag en regel i paketfiltrets flödestabell som stoppar källadressen.
+Om en lyckad inloggning finns från samma källa (40112) behandlar jag kontot som komprometterat och eskalerar enligt nedan innan jag gör mer.
+Jag söker data.srcip i Discover några minuter senare och kontrollerar att nya försök har upphört.
+Återställning behövs bara om någon kom in.
+Fas 4: Lärdomar
+Jag jämför antalet träffar med normalnivån och justerar monitorns tröskel om larmet var för känsligt eller för trubbigt.
+Jag dokumenterar utfallet i triageloggen.
+Jag rättar playbooken om något steg var otydligt.
+Eskalera när
+Regel 40112 har larmat, eller en lyckad inloggning finns från samma data.srcip.
+Samma källa träffade flera servrar.
+
+Till: teamets incidentansvarige.
+Med underlag: data.srcip, data.srcuser, tider, antal försök och sökningarna jag använde.
+
+Avfärda när
+
+Jag avfärdar ett larm bara om skälet går att kontrollera i loggen. Exempel: data.srcip är 172.20.1.10 (ctf-servern) och larmet kom direkt efter kontrollera U6.2 start. Källan och tiden syns i loggen, och inloggningen skedde med nyckel (Accepted publickey).
+
+Jag skriver alltid skälet med tid, källa och regel. “Det var säkert jag” räknas inte.
