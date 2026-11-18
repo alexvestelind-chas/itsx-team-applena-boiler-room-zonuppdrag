@@ -1,0 +1,218 @@
+# Vecka 7 – Elev-32
+
+## Härdningslista
+
+Följande härdningsåtgärder har genomförts:
+
+- SELinux är aktiverat.
+- SELinux körs i enforcing-läge.
+- Systemet är konfigurerat att starta med enforcing-läge.
+- En egen SELinux-policy för zonvakt har skapats.
+- Zonvakt körs i domänen zonvakt_t.
+- Zonvakt-modulen har installerats.
+- Katalogen /srv/zonwebb har korrekt SELinux-kontext.
+- Verifieringsskript har skapats och körts.
+- Konfigurationen har testats efter omstart.
+
+## Härdningsrapport
+
+# Påstående 1
+
+SELinux är aktiverat.
+
+**Dom: Stämmer**
+
+**Belägg:**
+
+Kommandot:
+
+sestatus
+
+Visade:
+
+SELinux status: enabled
+
+# Påstående 2
+
+SELinux körs i enforcing-läge.
+
+**Dom:** Stämmer
+
+**Belägg:**
+
+Kommandot:
+
+sestatus
+
+Visade:
+
+Current mode: enforcing
+
+# Påstående 3
+
+Systemet startar med enforcing-läge enligt konfigurationen.
+
+**Dom:** Stämmer
+
+**Belägg:**
+
+Kommandot:
+
+sestatus
+
+Visade:
+
+Mode from config file: enforcing
+
+# Påstående 4
+
+Zonvakt körs under den egna SELinux-domänen zonvakt_t.
+
+**Dom:** Stämmer
+
+**Belägg:**
+
+Kommandot:
+
+ps -eZ | grep zonvakt
+
+Visade:
+
+system_u:system_r:zonvakt_t:s0
+
+# Påstående 5
+
+SELinux-modulen för zonvakt är installerad.
+
+**Dom:** Stämmer
+
+**Belägg:**
+
+Kommandot:
+
+sudo semodule -l | grep zonvakt
+
+Visade:
+
+zonvakt
+
+# Påstående 6
+
+Katalogen /srv/zonwebb har korrekt SELinux-typ.
+
+**Dom:** Stämmer
+
+**Belägg:**
+
+Kommandot:
+
+/usr/local/bin/verifiera-hardning
+
+Visade:
+
+GÄLLER: /srv/zonwebb har typen httpd_sys_content_t
+
+----------------------------------------------------------------------------------------------------------------
+
+## Rättelselogg
+
+Påstående:
+Zonvakt-modulen är inte laddad.
+
+Dom:
+Fel
+
+Rättning:
+Kommandot `sudo semodule -l | grep zonvakt` visar att modulen `zonvakt` är installerad.
+
+## zonvakt.te Fil
+
+policy_module(zonvakt, 1.0.0)    # Skapar policyn zonvakt
+
+type zonvakt_t;                  # Typen som zonvakt körs som
+
+type zonvakt_exec_t;             # Typ för zonvakts programfil
+
+init_daemon_domain(zonvakt_t, zonvakt_exec_t)    # Startar zonvakt som zonvakt_t
+
+type zonvakt_log_t;              # Typ för zonvakts loggfiler
+
+logging_log_file(zonvakt_log_t)  # Talar om att det är loggfiler
+
+allow zonvakt_t self:fifo_file rw_fifo_file_perms;   # Får läsa och skriva FIFO-filer
+
+allow zonvakt_t self:unix_stream_socket create_stream_socket_perms;   # Får använda unix-sockets
+
+allow zonvakt_t self:tcp_socket { accept bind create listen setopt read write };  # Får använda nätverket
+
+corenet_tcp_bind_generic_node(zonvakt_t)   # Får ansluta till nätverket
+
+corenet_tcp_bind_generic_port(zonvakt_t)   # Får använda portar
+
+corecmd_mmap_bin_files(zonvakt_t)          # Får använda programfiler
+
+manage_dirs_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)   # Får skapa loggmappar
+
+manage_files_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)  # Får skapa och ändra loggfiler
+
+manage_lnk_files_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)  # Får hantera länkar
+
+logging_log_filetrans(zonvakt_t, zonvakt_log_t, { dir file lnk_file })   # Nya loggfiler får rätt typ
+
+domain_use_interactive_fds(zonvakt_t)   # Får använda terminalens filbeskrivare
+
+files_read_etc_files(zonvakt_t)         # Får läsa filer i /etc
+
+miscfiles_read_localization(zonvakt_t)  # Får läsa språkfiler
+
+allow zonvakt_t self:tcp_socket { accept bind create getattr listen setopt };   # Får använda TCP
+
+auth_read_passwd_file(zonvakt_t)        # Får läsa passwd-filen
+
+sssd_read_public_files(zonvakt_t)       # Får läsa publika SSSD-filer
+
+sssd_search_lib(zonvakt_t)              # Får använda SSSD-bibliotek
+
+---
+
+
+## zonvakt.fc
+
+```text
+/usr/local/bin/zonvakt -- gen_context(system_u:object_r:zonvakt_exec_t,s0)
+
+/var/log/zonvakt(/.*)? gen_context(system_u:object_r:zonvakt_log_t,s0)
+```
+
+---
+
+
+## Verifieringsutdata
+
+### sestatus
+
+
+SELinux status: enabled
+Current mode: enforcing
+Mode from config file: enforcing
+
+
+### sudo semodule -l | grep zonvakt
+
+
+utdata - zonvakt
+
+### ps -eZ | grep zonvakt
+
+
+utdata - system_u:system_r:zonvakt_t:s0
+
+
+### verifiera-hardning
+
+
+GÄLLER: SELinux körs i enforcing
+GÄLLER: SELinux-läge i config är enforcing
+GÄLLER: zonvakt kör i domänen zonvakt_t
+GÄLLER INTE: zonvakt-modulen är laddad (fick: 0, väntade: 1)
+GÄLLER: /srv/zonwebb har typen httpd_sys_content_t
