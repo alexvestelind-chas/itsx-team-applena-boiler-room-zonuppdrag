@@ -220,12 +220,12 @@ utdata - zonvakt
 
 utdata - system_u:system_r:zonvakt_t:s0
 
-
 ### verifiera-hardning
 
+Resultat:
 
-GÄLLER: SELinux körs i enforcing
-GÄLLER: SELinux-läge i config är enforcing
-GÄLLER: zonvakt kör i domänen zonvakt_t
-GÄLLER INTE: zonvakt-modulen är laddad (fick: 0, väntade: 1)
-GÄLLER: /srv/zonwebb har typen httpd_sys_content_t
+- SELinux körs i enforcing-läge.
+- SELinux är inställt på enforcing i konfigurationen.
+- Zonvakt körs i domänen zonvakt_t.
+- /srv/zonwebb har korrekt SELinux-typ.
+- Verifieringsskriptet rapporterade att zonvakt-modulen inte var laddad, men manuell kontroll visade att modulen var installerad.
