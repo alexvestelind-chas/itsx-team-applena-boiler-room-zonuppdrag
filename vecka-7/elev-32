@@ -16,7 +16,7 @@ Följande härdningsåtgärder har genomförts:
 
 ## Härdningsrapport
 
-# Påstående 1
+### Påstående 1
 
 SELinux är aktiverat.
 
@@ -32,7 +32,7 @@ Visade:
 
 SELinux status: enabled
 
-# Påstående 2
+### Påstående 2
 
 SELinux körs i enforcing-läge.
 
@@ -48,23 +48,7 @@ Visade:
 
 Current mode: enforcing
 
-# Påstående 3
-
-Systemet startar med enforcing-läge enligt konfigurationen.
-
-**Dom:** Stämmer
-
-**Belägg:**
-
-Kommandot:
-
-sestatus
-
-Visade:
-
-Mode from config file: enforcing
-
-# Påstående 4
+### Påstående 4
 
 Zonvakt körs under den egna SELinux-domänen zonvakt_t.
 
@@ -80,7 +64,7 @@ Visade:
 
 system_u:system_r:zonvakt_t:s0
 
-# Påstående 5
+### Påstående 5
 
 SELinux-modulen för zonvakt är installerad.
 
@@ -96,7 +80,7 @@ Visade:
 
 zonvakt
 
-# Påstående 6
+### Påstående 6
 
 Katalogen /srv/zonwebb har korrekt SELinux-typ.
 
@@ -125,7 +109,36 @@ Fel
 Rättning:
 Kommandot `sudo semodule -l | grep zonvakt` visar att modulen `zonvakt` är installerad.
 
-## zonvakt.te Fil
+## zonvakt.te 
+
+### Fil
+allow zonvakt_t self:fifo_file rw_fifo_file_perms;
+allow zonvakt_t self:unix_stream_socket create_stream_socket_perms;
+allow zonvakt_t self:tcp_socket { accept bind create listen setopt read write };
+corenet_tcp_bind_generic_node(zonvakt_t)
+corenet_tcp_bind_generic_port(zonvakt_t)
+corecmd_mmap_bin_files(zonvakt_t)
+
+manage_dirs_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)
+manage_files_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)
+manage_lnk_files_pattern(zonvakt_t, zonvakt_log_t, zonvakt_log_t)
+logging_log_filetrans(zonvakt_t, zonvakt_log_t, { dir file lnk_file })
+
+domain_use_interactive_fds(zonvakt_t)
+
+files_read_etc_files(zonvakt_t)
+
+miscfiles_read_localization(zonvakt_t)
+
+allow zonvakt_t self:tcp_socket { accept bind create getattr listen setopt };
+corenet_tcp_bind_generic_node(zonvakt_t)
+corenet_tcp_bind_generic_port(zonvakt_t)
+corecmd_mmap_bin_files(zonvakt_t)
+auth_read_passwd_file(zonvakt_t)
+sssd_read_public_files(zonvakt_t)
+sssd_search_lib(zonvakt_t)
+
+### Fil med förklaringar
 
 policy_module(zonvakt, 1.0.0)    # Skapar policyn zonvakt
 
