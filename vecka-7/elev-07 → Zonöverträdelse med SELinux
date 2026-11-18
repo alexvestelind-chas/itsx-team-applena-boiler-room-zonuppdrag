@@ -1,0 +1,140 @@
+# Playbook – Zonöverträdelse med SELinux
+
+**Team:** 8  
+**Vecka:** 7 – Härdning med Mandatory Access Control  
+**Elev:** elev-07  
+**Tjänst:** Zonvakt  
+**Port:** 7507  
+**Status:** Utkast – behöver testas
+
+## 1. Syfte
+
+Den här playbooken beskriver hur en zonöverträdelse upptäcks, undersöks och hanteras med hjälp av SELinux. Målet är att säkerställa att tjänsten Zonvakt inte utför otillåtna operationer och att säkerhetspolicyn fungerar som den ska.
+
+## 2. Bakgrund
+
+Zonvakt är en tjänst som körs på servern och kommunicerar via TCP-port 7507.
+
+Tjänsten kan ta emot olika kommandon:
+
+- `hej` – normal kommunikation med tjänsten.
+- `overtrad` – försöker utföra en otillåten skrivning till `/etc/zonvakt-otillaten`.
+
+SELinux ska förhindra den otillåtna operationen och logga händelsen. Tjänsten ska köras under sin egen SELinux-domän `zonvakt_t`.
+
+## 3. Detektion
+
+En zonöverträdelse kan upptäckas genom SELinux AVC-loggar, där nekade operationer registreras.
+
+Kommandon för att undersöka händelsen:
+
+```bash
+sudo ausearch -m avc -c zonvakt -i
+```
+
+Kontrollera vilken SELinux-domän tjänsten körs i:
+
+```bash
+ps -eZ | grep zonvakt
+```
+
+Förväntad domän:
+
+```text
+zonvakt_t
+```
+
+AVC-loggar används för att se vilken operation som nekats, vilken resurs som berörs och varför SELinux har blockerat den.
+
+## 4. Incidenthantering
+
+### Fas 1 – Förberedelse
+
+Kontrollera att SELinux är aktiverat och kör i Enforcing-läge.
+
+```bash
+getenforce
+sestatus
+```
+
+Kontrollera att Zonvakt kör:
+
+```bash
+sudo systemctl status zonvakt
+```
+
+Kontrollera att SELinux-policyn finns installerad:
+
+```bash
+sudo semodule -l | grep zonvakt
+```
+
+### Fas 2 – Analys
+
+Vid en misstänkt zonöverträdelse ska följande kontrolleras:
+
+- Vilken operation försökte tjänsten utföra?
+- Vilken fil eller resurs berördes?
+- Vilken SELinux-domän kör processen i?
+- Nekades operationen av SELinux?
+- Finns det AVC-meddelanden som visar orsaken?
+
+Loggarna analyseras för att avgöra om det är en förväntad blockering eller om tjänstens policy behöver justeras.
+
+### Fas 3 – Åtgärd och begränsning
+
+Om SELinux har blockerat den otillåtna operationen ska blockeringen verifieras.
+
+Kontrollera att:
+
+- Zonvakt kör i domänen `zonvakt_t`.
+- Den otillåtna skrivningen inte har genomförts.
+- SELinux fortfarande kör i Enforcing.
+- Policyn inte ger tjänsten fler behörigheter än nödvändigt.
+
+Förslag från `audit2allow` ska granskas innan de används. Behörigheter ska inte läggas till automatiskt om tjänsten inte behöver dem.
+
+SELinux ska inte stängas av eller sättas i permissive-läge för att lösa problemet.
+
+### Fas 4 – Återställning och verifiering
+
+Testa normal kommunikation med Zonvakt:
+
+```bash
+echo hej | nc -w2 127.0.0.1 7507
+```
+
+Förväntat resultat är att tjänsten svarar normalt.
+
+Testa sedan den otillåtna operationen:
+
+```bash
+echo overtrad | nc -w2 127.0.0.1 7507
+```
+
+Den otillåtna skrivningen ska blockeras av SELinux.
+
+Kontrollera efter testet:
+
+```bash
+getenforce
+ps -eZ | grep zonvakt
+sudo ausearch -m avc -c zonvakt -i
+```
+
+Verifiera att SELinux fortfarande är Enforcing och att den nekade operationen finns dokumenterad i loggarna.
+
+## 5. Risk för falsklarm
+
+Falsklarm kan uppstå om tjänsten försöker utföra en operation som ser otillåten ut, men som egentligen är en del av normal funktion.
+
+Därför ska händelsen alltid analyseras innan en policy ändras. En nekad operation är inte automatiskt ett angrepp.
+
+## 6. Dokumentation
+
+Vid varje incident ska följande dokumenteras:
+
+- Datum och tid
+- Vad som upptäcktes
+- Vilken operation som nekades
+- Vilken resurs som berör
