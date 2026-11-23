@@ -1,0 +1,48 @@
+#!/bin/bash
+# verifiera-hardning: läser av tillståndet, ändrar ingenting.
+fel=0
+
+# 1. SELinux är tvingande just nu
+if [ "$(getenforce)" = "Enforcing" ]; then
+  echo "GÄLLER: SELinux är i läge Enforcing nu (getenforce)"
+else
+  echo "GÄLLER INTE: SELinux är inte i läge Enforcing nu (getenforce)"
+  fel=1
+fi
+
+# 2. SELinux är tvingande efter nästa omstart
+if grep -q '^SELINUX=enforcing' /etc/selinux/config; then
+  echo "GÄLLER: /etc/selinux/config sätter SELINUX=enforcing"
+else
+  echo "GÄLLER INTE: /etc/selinux/config sätter inte SELINUX=enforcing"
+  fel=1
+fi
+
+# 3. zonvakt kör i sin egen domän
+if ps -eZ | grep -q zonvakt_t; then
+  echo "GÄLLER: zonvakt kör i domänen zonvakt_t (ps -eZ)"
+else
+  echo "GÄLLER INTE: ingen process kör i domänen zonvakt_t (ps -eZ)"
+  fel=1
+fi
+
+# 4. brandväggen startar vid boot och kör
+if systemctl is-enabled --quiet nftables && systemctl is-active --quiet nftables; then
+  echo "GÄLLER: nftables är aktiverad vid boot och kör (systemctl)"
+else
+  echo "GÄLLER INTE: nftables är inte både aktiverad och igång (systemctl)"
+  fel=1
+fi
+
+
+# 5. zonvakt får bara binda sin egen porttyp
+bind=$(sesearch -A -s zonvakt_t -c tcp_socket -p name_bind | grep '^allow')
+if seinfo --portcon=7539 | grep -q 'portcon tcp 7539 .*:zonvakt_port_t:' \
+   && [ "$bind" = "allow zonvakt_t zonvakt_port_t:tcp_socket name_bind;" ]; then
+  echo "GÄLLER: port 7539 är märkt zonvakt_port_t och zonvakt_t får bara binda den (seinfo, sesearch)"
+else
+  echo "GÄLLER INTE: 7539 är inte märkt zonvakt_port_t eller zonvakt_t får binda fler portar (seinfo, sesearch)"
+  fel=1
+fi
+
+exit $fel
