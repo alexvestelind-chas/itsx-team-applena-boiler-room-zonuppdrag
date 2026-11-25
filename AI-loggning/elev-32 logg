@@ -1,0 +1,274 @@
+# AI-logg för elev-32 8 Alex Ochana
+
+# AI-logg vecka 1
+
+Verktyg: Copilot och Claude (chattassistenter)
+
+Hur jag använde det: Jag använde AI som studiehjälp för att förstå veckans föreläsningar (nätverkslager, SSH, IP- och MAC-adresser, ARP och routing) och som stöd när jag felsökte i CTF-labbarna U1.1-U1.5 och forensikuppgiften. Jag skickade in uppgiftstexter, instruktioner, terminalutskrifter, felmeddelanden från SSH och SCP, skärmbilder från labbmiljön och mina anteckningar från föreläsningarna. AI:n såg inte hela föreläsningarna och hade inte tillgång till mina pcap-filer, bara det jag själv valde att visa. Jag skickade aldrig in lösenord, privata SSH-nycklar eller annat känsligt.
+
+Det jag gjorde själv: Jag genomförde U1.1-U1.5 själv och lämnade in alla flaggor med egna svar.
+- Jag skapade SSH-nycklar, kopierade dem till rätt system och testade inloggning mot jump-servern och min egen server (U1.1).
+- Jag startade paketfångsten och hittade UDP-paketen och orden i rätt ordning (U1.2).
+- Jag analyserade trafiken i Wireshark och följde DNS, HTTP, ICMP och TCP för att hitta flaggans fyra delar (U1.3).
+- Jag byggde en baslinje över trafiken och hittade flödet som avvek (U1.4).
+- Jag skannade inom det tillåtna IP-intervallet och hittade den gömda servern, tjänsten och flaggan (U1.5).
+- Jag gjorde forensikuppgiften själv: hashvärden, arbete på en kopia, dokumentation, skärmbilder, zip-fil och kontroll av SHA-256-summan.
+
+Det jag fick hjälp med: Förklaringar av föreläsningarna i enklare språk, SSH och SCP (authorized_keys och known_hosts), felmeddelanden i Linux och PowerShell, hur Wireshark-filter och tcpdump används, att formulera loggposter och reflektioner, och att förstå lärarens återkoppling på forensikuppgiften.
+
+Där AI var otydlig eller hade fel:
+- Den föreslog flera SCP-kommandon innan det stod klart att jag körde dem från fel system.
+- Den blandade ihop användarnamnet student med elevnumret.
+- Den utgick från att filer redan fanns på servern fast de inte hade skapats eller kopierats över.
+- Den föreslog Linux-sökvägar när problemet låg på Windows-sidan.
+- Den antog fel filnamn eftersom mina bilder hade dubbel filändelse (.png.png).
+Därför kontrollerade jag alltid förslagen i terminalen innan jag använde dem.
+
+Det jag tar med mig:
+- Felmeddelanden är ofta den viktigaste ledtråden, så jag läser dem noga.
+- Jag måste veta från vilken dator ett kommando körs, särskilt vid SSH och SCP.
+- En hash är bara användbar om man jämför samma fil vid olika tidpunkter.
+- Man ska dokumentera varje steg så att någon annan kan följa arbetet.
+- AI kan hjälpa med teori och felsökning, men alla kommandon och resultat måste kontrolleras i praktiken.
+
+
+
+
+
+
+# AI-logg vecka 2
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå subnetting och för att få mina svar rättade.
+
+Det jag gjorde själv: Jag svarade själv på Ö1-Ö5, Ö7 och Ö9 och rättade mina fel efter hjälp. Jag räknade U2.1 och U2.2 själv och hade fel på några delar, till exempel slutadressen för /23 och /24 och ordningen på broadcast, första och sista. Jag valde också själv /30 för länknätet. Jag lade ut näten i U2.2 och granskade en annan elevs inlämning.
+
+Det jag fick hjälp med: Metoden förklarades steg för steg, särskilt summering (U2.4) och hur man räknar i tredje oktetten. R1-R8, nätadresserna i Ö8, Ö6, Ö10 och förberedelsefrågan fick jag som utkast av Claude, och jag har gått igenom dem. Jag fick också hjälp att formulera kommentarer och sätta ihop inlämningsfilen.
+
+Där AI var otydlig: Claude växlade först mellan /30 och /31 för länknätet i U2.2. Jag kontrollerade själv och valde /30, eftersom behovet var 2 värdar.
+
+Det jag tar med mig: Jag dubblar en gång per bit, bitarna är inte svaret, och ibland räknar man i både tredje och fjärde oktetten. Jag kontrollerar mina svar med ipcalc.
+
+
+
+
+
+
+
+
+# AI-logg vecka 3
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå Zero Trust, implicit tillit och segmentering, för att få mina svar rättade och för att få hjälp med flödestabellen.
+
+Det jag gjorde själv: Jag tittade på föreläsningarna och körde alla CTF-labbar själv: U3.2 (curl, token och flagga), U3.1 (hämtade fångsten, öppnade den i Wireshark och hittade de omotiverade flödena via Conversations) och U3.4. Jag skrev egna svar på Ö1–Ö5 innan jag fick dem rättade, och jag hade fel på några delar, till exempel att jag bytte plats på PA och PEP i Ö2. Jag svarade själv på kunskapsfrågorna om varför min server nekades i U3.2, skillnaden mellan makro och mikro, varför Hetzners molnbrandvägg inte räcker och varför utgående regler behövs. Jag körde ss -tlnp, grep mot /etc/services och cat /etc/resolv.conf på min server och granskade en annan elevs inlämning.
+
+Det jag fick hjälp med: Claude förklarade begrepp enkelt (implicit tillit, lateral rörelse, sprängradie, CISA-stegen), rättade Ö1–Ö5 och förklarade metoden för U3.1 och för hur man avgör vilka flöden som är korrekta. Ö6–Ö10 fick jag som utkast av Claude, och jag har gått igenom dem och skrivit om dem med egna ord. Flödestabellen för min server och utkastet till workshop 1-checklistan fick jag också som utkast. Jag fick hjälp att formulera kamratbedömningen och den här loggen.
+
+Där AI var otydlig: Claude gav mig först ett cmd-kommando (%USERPROFILE%) när jag körde PowerShell, så filen hamnade i C:\Windows\system32 och jag fick flytta den. Claude hade inte sett kursvideorna, CISA-dokumentet eller lösningsförslagen, så förklaringen av Traditional och Advanced är en förenkling som jag jämför med CISA:s egna ord. Claude kunde inte läsa vårt GitHub-repo, så teamets flödestabell är inte gjord av AI. Orden i U3.1 läste Claude först ur en hexdump jag klistrade in, och jag kontrollerade dem själv i Wireshark innan jag lämnade in.
+
+Det jag tar med mig: Att sitta på rätt nät bevisar ingenting. Jag frågar mig alltid vad någon måste visa för att komma in, och är svaret ingenting är det implicit tillit. Målporten säger vilken tjänst, och ett flöde är korrekt bara om kombinationen av källa, mål och port har en verksamhetsfunktion. Hetzners molnbrandvägg ser inte trafik inom privata nätet, så den måste filtreras på värden. Allt som inte uttryckligen är tillåtet ska vara nekat, både in och ut
+
+
+
+
+
+
+# AI-logg vecka 4
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå föreläsningarna om default deny, nftables, loggning och paketfångst, för att få hjälp när något inte fungerade i labbarna och för att få mina svar på Ö1–Ö3 rättade.
+
+Det jag gjorde själv: Jag tittade på föreläsningarna och körde CTF-labbarna U4.1, U4.2, U4.3 och U4.5 själv på min server och på jump. I U4.3 hämtade jag fångsten, öppnade den i Wireshark, filtrerade fram de fyra som fick SYN-ACK, hittade de gröna raderna som filtret avvisade och slog upp orden med sed i ordlistan. Jag skrev egna svar på Ö1–Ö3 innan jag fick dem rättade, och jag hade fel på några delar, till exempel att jag svarade molnbrandväggen på flöden i det privata nätet (Ö2b och Ö2c) och blandade ihop vad den första utgående regeln gör (Ö3). Jag körde ip -br addr, ss -tlnp, nft list ruleset, tcpdump och timeout-testerna själv. Jag skrev in och rättade mina regler F2 och F3 i zon.nft, testade F2 tillsammans med Mouhamad och hittade själv felet i felsökningsövningen (databasen saknade sin in-regel). Jag granskade också elev-03:s inlämning.
+
+Det jag fick hjälp med: Claude förklarade begrepp enkelt (default deny, de två lagren, policy drop, stateful, RST, ICMP-koderna och tcpdump-flaggorna), gav mig stegen för U4.1, U4.2 och U4.5 med markering för vilken dator jag skulle sitta på (jump eller labbservern), och gjorde en grundfil för zon.nft utifrån mallen i studieguiden. Jag fick hjälp att läsa tcpdump-utskrifterna när Mouhamads test gav 124 och sedan 1, och Claude gjorde ett utkast till testfallslista och förklarade test.sh. Jag fick också ett utkast till kamratbedömningen och den här loggen, och jag har skrivit om dem med egna ord.
+
+Där AI var otydlig: Först sa Claude inte tydligt vilken dator kommandona skulle köras på, så jag körde sudo mkdir på jump och fick "not allowed". Efter det fick jag stegen markerade med JUMP eller LAB. I U4.3 antog Claude att de röda raderna var RST, men fångsten innehöll inga RST. Det var filtret som svarade med ICMP, och jag hittade de rätta raderna genom att titta på färgerna själv. I U4.5 kom reject with tcp reset inte från studieguiden, så Claude kollade syntaxen mot nftables egen dokumentation. Claude gissade också att säkerhetsnätet hade gått ut och rensat reglerna, men det visade sig att reglerna fortfarande låg kvar när jag kollade med nft list ruleset. Portarna 443 och 8080 i flödena var antaganden som jag och mitt team måste stämma av. Claude kunde inte se vår flödestabell, vårt repo, kursvideorna eller lösningsförslagen, så mitt team har själva bestämt vilka rader som gäller. När jag granskade elev-03 kunde Claude inte se flervalsalternativen eller facit, så jag kontrollerade bokstäverna själv.
+
+Det jag tar med mig: Trafik inne i det privata nätet ser inte molnbrandväggen, så den måste filtreras på servern. Allt är förbjudet som standard och jag öppnar bara det som behövs, både in och ut (policy drop). Ett flöde mellan två servrar kräver en regel på båda sidor: sändarens ut och mottagarens in. En nekad anslutning bevisar ingenting om ingen lyssnar, och returkoden säger inte vem som nekade, så jag kör alltid testet med en lyssnare och en tcpdump samtidigt. Och ett test är inte klart förrän jag har provat både ett fall som ska släppas igenom och ett som ska nekas.
+
+
+
+
+
+
+
+# AI-logg vecka 5
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå veckans videor och instuderingsövningar, och som stöd när jag byggde och felsökte central loggning på min server (elev-32). Jag skickade in studieguiden, bilder från föreläsningarna och utskrifter från min server.
+
+Det jag gjorde själv:
+
+Jag svarade själv på Ö1 och Ö6, och förklarade kön i Ö8 och uid/euid/auid i Ö9 med egna ord.
+Jag körde alla kommandon på min server och jump och klistrade in utskrifterna.
+I U5.4 körde jag grep och awk, hittade box och kontot start, och hittade själv posten med auid=1001 bland bruset. Jag hittade också servern som slutade skicka loggar (klockslaget 09 avvek).
+I U5.1 till U5.3 och U5.5 byggde jag konfigurationen steg för steg: brandväggsregeln för 6514, CA-certifikatet, 50-central.conf, blockeringen i U5.2 och auditd.
+Jag körde omstartstestet i dag och kontrollerade att rsyslog, brandväggen och auditregeln kom tillbaka.
+Jag gjorde kamratbedömningen av elev-29 och bestämde själv vad jag tyckte.
+
+Det jag fick hjälp med:
+
+Förklaringar av videorna i enkelt språk, särskilt PRI (facility och severity), TLS och rsyslog-reglerna (Ö7).
+Utkast till svar på Ö2, Ö3, Ö4, Ö5, Ö7 och Ö10, som jag har gått igenom.
+Kommandon och konfigurationsfiler för labbarna, samt hjälp att tolka felmeddelanden (till exempel att dnf inte nådde internet, så jag hämtade audispd-plugins via jump).
+Felsökning i U5.5: rsyslogd -N1 visade att samma TLS-inställningar fanns i två filer. Claude hjälpte mig förstå att 50-tls.conf hade en egen action utan template.
+Utkast till loggkällekarta, frågor, skyddsbeskrivning och flödestabell, som jag fyllde med riktiga rader från min server.
+Språkhjälp till mina beskrivningar av U5.2, U5.4 och U5.5.
+
+Där AI var otydlig eller hade fel:
+
+Claude sa först att /etc/audit/rules.d/ var tom. Det var fel: jag hade bara inte rättighet att läsa katalogen utan sudo, och regeln låg redan i root.rules.
+Claude använde nyckeln root-cmd, men min regel heter rootcmd, så första sökningen gav ingenting. Jag såg det i auditctl -l.
+Mallnamnet RSYSLOG_SyslogProtocol23Format kom från Claudes egen kunskap och står inte i studieguiden. Jag kontrollerade det med rsyslogd -N1 och genom att testa.
+Claude beskrev först problemet i U5.5 som att en regel "blockerade". Jag rättade det: den andra filen skickade samma rader i det gamla formatet.
+
+Det jag tar med mig:
+
+Kontrollera alltid konfigurationen med rsyslogd -N1 före omstart, och kolla efter dubbletter i /etc/rsyslog.d/.
+Felsök nedifrån och upp: lokal logg, rsyslogs logg, tcpdump, svar från loggservern.
+TLS skyddar bara transporten. Det är auid som visar vem som låg bakom ett root-kommando, och kön måste ha queue.filename för att överleva en omstart.
+AI kan ha fel om detaljer, så jag verifierar mot min egen server och mot manualsidor.
+
+
+
+
+# AI-logg vecka 6
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå veckans föreläsningar och instuderingsövningar, och som stöd när jag arbetade i Wazuh (sökning, monitorer, triage och playbook). Jag skickade in bilder på föreläsningarnas sammanfattningar, studieguiden, lärarens instruktioner och utskrifter och skärmbilder från min server och Wazuh. Claude såg bara sammanfattningsbilderna, inte hela föreläsningarna.
+
+Det jag gjorde själv:
+
+Jag skrev egna svar på Ö1 till Ö10 med egna ord innan jag fick rättning. [Ange om du lämnade in dina egna formuleringar eller Claudes språkligt förbättrade versioner.]
+Jag körde alla kommandon på jump och klistrade in utskrifterna.
+I U6.1 körde jag jq-filtret på nivå, hittade händelsen med rule.id 100600 och läste ut flaggan.
+I U6.2 byggde jag monitorn i Alerting, startade testet och fick flaggan.
+I U6.3 sökte jag i Discover och rättade mitt första försök genom att avgränsa på min egen location (elev-32).
+I U6.4 hittade jag kedjan genom att filtrera på nivå och sedan titta på allt från samma data.srcip (10.40.2.200).
+I U6.5 hittade jag programmet syncagent bland loggarna i wazuh-archives-*, byggde monitorn och körde om testet när det första larmet inte räknades.
+Jag hittade själv posten för zonöverträdelsen (ZON-IN-DROP) och byggde monitorn för den.
+Jag gjorde kamratbedömningen av [elev-NN] och bestämde själv vad jag tyckte.
+
+Det jag fick hjälp med:
+
+Förklaringar av föreläsningarna i enkelt språk (Wazuh-flödet, decoder och regel, korrelation, syslog, MITRE T1110, larmtrötthet, NIST, triage).
+Rättning av mina svar på Ö1 till Ö10 och förslag på språk.
+Kommandon från studieguiden (jq, DQL-sökningar) och förklaring av varje del.
+Hjälp att läsa av utskrifter och skärmbilder: vad rule.id 5712 och 5710 betyder, vad som syns i previous_output, hur ZON-IN-DROP och syncagent-raderna ska tolkas.
+Förslag på monitorinställningar (filter, fönster, tröskel) och på ATT&CK-id (T1071.001).
+Utkast till nedbrytningar för brute force, zonöverträdelse och beaconing, mall för triagepost, ett utkast till playbook och texten till kamratbedömningen.
+Formuleringar till mina inlämningstexter.
+
+Där AI var otydlig eller hade fel:
+
+Claude sa först att min monitor filtrerade på rule.id: 5712. När jag klistrade in den visade det sig att den filtrerar på rule.groups: authentication_failed, och posterna för 5712 har gruppen authentication_failures. Claude rättade sig.
+Claude gissade att mina brute force-poster låg i /var/log/remote/inmatat/elev-32/normal.log. U6.2-försöken låg i /var/log/remote/elev-32/syslog.log. Därför larmade min nya monitor aldrig, och jag använde i stället min fungerande U6.2-monitor.
+I U6.3 gissade Claude först att kontrollen räknade bara normaltrafik. Det var fel: det som stämde var att avgränsa på min egen server.
+Claude föreslog tröskeln 60 för zonöverträdelsen utifrån en mätning på några timmar. Monitorn larmade ändå flera gånger under natten, så mätningen täckte för kort period. [Ange om du mätte om.]
+Monitorn id 5712 alert visade sig bevaka elev-45, inte min server. Det upptäcktes först när jag klistrade in inställningarna.
+Claude kände inte till programmet syncagent och antog att det är ett påhittat testprogram. Det är en slutsats och inte något jag har bekräftat.
+ATT&CK-id:t T1071.001 kom som förslag från Claude. [Ange om du kontrollerade det mot attack.mitre.org.]
+Claude hade inte sett lösningsförslagen eller auditd-regeln från vecka 5, så allt som rör dem är oprövat. [Ange om monitorn för root-kommando är byggd och verifierad.]
+
+Det jag tar med mig:
+
+Börja med att titta i loggarna (wazuh-archives-*) när det inte finns något larm, och avgränsa stegvis: tid, värd och sedan fält.
+Avgränsa alltid på den egna servern (location), annars räknar jag allas data.
+Mät normaltrafiken över en tillräckligt lång period innan jag sätter tröskeln, och motivera den med siffror.
+Ett larm som redan är Active när testet startar räknas inte, så vänta tills det är Completed och ändra inte monitorn mellan start och kontrollera.
+Håll isär observation och slutsats.
+AI kan gissa fel om fält och sökvägar, så jag kontrollerar mot posterna i min egen Wazuh.
+
+
+
+
+# AI-logg vecka 7
+
+Verktyg: Claude (chattassistent)
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå veckans videor och övningar, och som felsökningsstöd i SELinux-labbarna (U7.1–U7.6) och i nftables. Jag skickade in studieguiden, skärmbilder på videornas sammanfattningar, lärarens Slack-tips, min kamrats övningssvar och utskrifter från min server (ls -Z, ausearch, audit2allow, nft list ruleset, systemctl status, journalctl). Claude såg bara sammanfattningsbilderna, inte hela videorna. Jag matade inte in lösenord eller nycklar. [Ange om du maskerade något, till exempel IP-adresser.]
+
+Det jag gjorde själv:
+
+Jag skrev egna svar på Ö1–Ö10 innan jag fick rättning. [Ange om du lämnade in dina egna formuleringar eller Claudes språkligt förbättrade versioner.]
+Jag körde alla kommandon på min server och klistrade in utskrifterna.
+U7.2: jag fick 403, läste AVC:n (httpd_t nekades getattr på var_t) och rättade typen med semanage fcontext och restorecon.
+U7.3: jag installerade zonvakt, genererade och byggde policyn, felsökte kraschen (SEGV, map på python3.9, permissive=0) och valde själv vilka rader från audit2allow som fick vara med.
+Jag felsökte nätverket med räknarregler i nftables, tog bort dem efteråt och följde lärarens D9-lösning.
+U7.5: jag skapade skriptet /usr/local/bin/verifiera-hardning, gjorde det körbart, startade om servern och körde det igen.
+Jag gjorde kamratbedömningen av Ö1–Ö9 och bestämde själv vad jag tyckte.
+
+Det jag fick hjälp med:
+
+Förklaringar av videorna i enkelt språk (DAC/MAC, lägen, kontext, AVC, härdning, AI-kritik, rättelselogg).
+Rättning av mina svar på Ö1–Ö10 och förslag på språk.
+Att läsa av utskrifter: vad { getattr }, { map }, permissive=0 och unconfined_service_t betyder.
+Kommandon från studieguiden med förklaring av varje del.
+Utkast till inlämningstexter, flaggtexter och kamratbedömningen.
+
+Där AI var otydlig eller hade fel:
+
+Claude gissade att brandväggen var orsaken till att dnf och sepolicy generate fick timeout, och föreslog en extra DNS-regel (F5). Räknarregler visade att paketen lämnade servern. Det var molnbrandväggen som stoppade dem, och läraren gav lösningen (D9).
+Claude sa att tomt resultat på ZON-UT-DROP visade att brandväggen inte blockerade. Det var fel, eftersom loggregeln är begränsad till 10 per minut.
+Claude drog slutsatsen att zon.nft inte laddades vid omstart. Det var fel: min grep kördes utan sudo, och /etc/sysconfig/nftables.conf innehåller include "/etc/nftables/zon.nft".
+Claude gav sepolicy generate utan sökvägen till programmet, vilket gav ValueError: Command required.
+Claude trodde att sudo skulle lägga policyfilerna i min mapp. Mappen var tom, och jag fick köra med sh -c 'cd ... && ...'.
+Raden permissive zonvakt_t; saknades i zonvakt.te, trots att Claude utgick från att domänen var permissiv. AVC:erna visade permissive=0.
+I U7.6 gav bygget unknown type zonvakt_port_t. Claude hade inte sett min .te-fil och sa inte att man inte ska köra semodule -i när make misslyckats. [Ange hur du löste det och om kontrollera U7.6 gick igenom.]
+Claude hade inte sett lösningsförslagen till övningarna, så rättningen av Ö1–Ö10 bygger på studieguiden och Claudes egen bedömning.
+
+Det jag tar med mig:
+
+Ett välformulerat svar är inte ett bevis. Varje påstående ska ha ett kommando och ett utfall bredvid sig.
+Läs AVC:n först och fråga om tjänsten ska få göra det, innan jag ändrar policyn.
+Ändra en sak i taget och mät, i stället för att gissa orsaken.
+Spara allt som ska gälla efter omstart i filer, och kontrollera med sudo så att jag inte tolkar ett tomt svar fel.
+Kontrollera filen efter varje redigering (grep -n), och bygg om innan jag laddar modulen.
+
+
+
+
+# AI-logg vecka 8
+
+Hur jag använde det: Jag använde Claude som studiehjälp för att förstå veckans föreläsningar och övningar, och som metodstöd i CTF-labbarna U8.1-U8.4. Jag skickade in studieguiden, skärmbilder på föreläsningarnas sammanfattningar, lärarens guide, skärmbilder från Wireshark och Discover samt utskrifter från terminalen (base32-avkodning). Claude såg bara sammanfattningsbilderna, inte hela föreläsningarna, och såg aldrig min pcap, bara de skärmbilder jag skickade. Jag matade inte in lösenord eller nycklar. [Ange om du maskerade något. På flera skärmbilder syntes interna IP-adresser, och guiden säger att de inte ska delas med en AI.]
+
+Det jag gjorde själv:
+
+Jag skrev egna svar på Ö1-Ö10 innan jag fick rättning. [Ange om du lämnade in dina egna formuleringar eller Claudes förenklade versioner.]
+Jag körde alla filter i Wireshark och alla kommandon på ssh lab och ssh jump själv.
+U8.1: jag hittade TXT-frågorna mot sync.telemetri-app.net, avkodade varje kod för hand med tr och base32 -d, la till = tills längden gick att dela med 8 och fick fram fyra ord. Koden zfjfwr3r blev skräp, alltså brus. [Ange om flaggan godkändes.]
+U8.2: jag läste tiden på första paketet i varje steg och satte dem i ordning. [Ange vad kontrollera U8.2 svarade.]
+U8.3: jag läste av den långa SSH-sessionen (11:17:08 UTC, källport 57391), sökte i Discover med data.srcport:57391 och valde rätt loggrad på källadress, källport och tid. Kontrollen godkände U8.3.
+U8.4: jag filtrerade på SYN från min egen server och såg att alla gick till samma mål och port med jämn takt. [Ange vad kontrollera U8.4 svarade.]
+
+Det jag fick hjälp med:
+
+Förklaringar av föreläsningarna i enkelt språk (filter, TCP, ARP/DNS, ATT&CK, de sex frågorna, NIST, tidsstämplar, loggplattformen).
+Rättning av mina svar på Ö1-Ö10 och förslag på språk.
+Att förstå kommandon, till exempel sort | uniq -c, base32-avkodningen och DQL-sökningen i Discover.
+Utkast till inlämningstexter för U8.1-U8.4.
+
+Där AI var otydlig eller hade fel:
+
+Claude gav en lång bash-loop som skulle avkoda alla namn på en gång. Den fungerade inte, eftersom tshark inte finns på jump. Avkodningen görs på ssh lab.
+Claude sa att de längsta namnen troligen bar orden. Det var en gissning, och längden avgjorde ingenting. Jag fick avkoda varje kod och se vilka som blev ord.
+Claude gissade att T1021 var tekniken som saknades, utan att ha sett mina paket. Mina skärmbilder visade SSH från min server till en tredje värd, så det som saknades var T1110, eftersom det bara fanns tre SYN mot port 22.
+Claude sa att 16 träffar i Discover var rimligt. Det var en gissning, och det var 329 träffar. Jag fick smalna av med data.srcport:57391.
+Claude föreslog först att söka på portnumret som fritext. Det gav noll träffar, och fältsökning fungerade eftersom Wazuh lagrar porten i ett eget fält.
+Claude var otydlig om vilken siffra som är sekvensnumret, och jag förväxlade först paketnumret med den. Jag kollade själv i namnen i Wireshark.
+Claude läste målet för felkonfigurationen (loggservern, port 1514) ur skärmbilder där bara en del av raderna syntes. Jag kontrollerade själv att alla SYN mot loggservern hade samma port och jämn takt. SYN-ACK har jag inte kontrollerat, så att anslutningen misslyckas är en hypotes.
+Claude hade inte sett lärarens lösningsförslag till Ö1-Ö10, så rättningen bygger på studieguiden och Claudes egen bedömning.
+
+Det jag tar med mig:
+
+Ett välformulerat svar är inte ett bevis. Varje påstående ska ha ett paketnummer eller en loggpost.
+Noll träffar betyder inte "det hände inte". Testa filtret på något som finns, och prova fältsökning i stället för fritext.
+Titta på mönstret (antal mål, antal portar, takt), inte på enstaka paket.
+Tid räcker aldrig ensam när jag korrelerar fångst och logg. Källa och port måste också stämma.
+Beskriv ett utdrag för AI:n i stället för att dela interna adresser och hela fångsten.
