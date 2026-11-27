@@ -1,0 +1,23 @@
+# Rättelselogg – elev-39
+
+Påståendena är numrerade ur AI-utkastet (råsvar, försök 2, underlag insamlat 2026-11-23). Beläggen är körda på servern 2026-11-27 06:58 UTC med `belagg.sh` (läser av, ändrar inget), samt `ausearch` på servern och på jump. IP-adresser i utdata är maskade (`<IP>`). Domarna är mina; utkastet till tabellen togs fram med Claudes hjälp och jag har granskat varje rad.
+
+| Påst. nr | Påstående (kort) | Dom | Kommando som avgjorde | Faktiskt utfall | Feltyp | Ändrat till |
+|---|---|---|---|---|---|---|
+| P1 | SELinux enabled, targeted, current och config enforcing, MLS enabled | stämmer | `sestatus` | `enabled`, `targeted`, `enforcing`, `enforcing`, MLS `enabled` | – | – |
+| P2 | zonvakt körs som PID 4126 i zonvakt_t | stämmer | `ps -eZ \| grep zonvakt` | `system_u:system_r:zonvakt_t:s0 4126 zonvakt` | – | – |
+| P3 | Modulen zonvakt är laddad | stämmer | `sudo semodule -l \| grep -i zonvakt` | `zonvakt` | – | – |
+| P4 | Åtgärd 1: servern startades om och skriptet kördes efteråt | stämmer, med begränsning | `last reboot`, `uptime -s` | Senaste omstart 19 nov 05:27. Porttypen (22/11) och kontroll 5 (23/11) tillkom efter den och är inte provade över en omstart. | ofullständigt | Omstarten gäller kontroll 1–4. Kontroll 5 och porttypen har inte provats över omstart. |
+| P5 | Modulen saknar `permissive zonvakt_t;` och `files_manage_etc_files` | stämmer | `grep -n -i 'permissive\|files_manage_etc' ~/policy/zonvakt.te` | inga träffar | – | – |
+| P6 | Egen loggtyp zonvakt_log_t och tjänsten får skriva sin logg | stämmer | `ls -Z /var/log/zonvakt`, `tail /var/log/zonvakt/zonvakt.log` | `zonvakt_log_t` på katalog och fil. Loggrader skrivna 2026-11-22. | – | – |
+| P7 | Tjänsten nekas skapa filer i etc_t (AVC, permissive=0) och händelsen hittades i Wazuh (regel 100200) | stämmer | `sudo ausearch -m avc -i -c zonvakt \| grep etc_t`. Wazuh Discover, U7.3. | AVC `{ write }` mot `etc_t`, `permissive=0`, `comm=zonvakt`: 18 nov 10:27:55 UTC (pid 23702) och 22 nov 07:01:35 UTC (pid 4126). Wazuh-träffen 18 nov 11:27:58 svensk tid motsvarar händelsen 10:27:55 UTC (cirka 3 s fördröjning). Kursfilen `U7.4-audit.log` (12 nov) är en separat övningsfil. | – | Läggs till: beläggen är från min egen server. Kursfilen är separat. |
+| P8 | Utan egen domän kör tjänsten som unconfined_service_t | ogrundat | – (inget kommando visar det på min server) | Ingen utdata. Påståendet kommer från studieguiden (vecka 7), inte från min server. | ogrundat | Utan egen domän kör tjänsten enligt studieguiden som unconfined_service_t (ej provat på min server). |
+| P9 | Tabell inet zon, kedjan in har policy drop | stämmer | `sudo nft list chain inet zon in` | `type filter hook input priority filter; policy drop;` | – | – |
+| P10 | Reglerna ligger i /etc/nftables/zon.nft, som börjar med flush ruleset, och nftables är aktiverad vid boot | stämmer | `sudo head -n 3 /etc/nftables/zon.nft`, `systemctl is-enabled nftables`, `is-active` | `flush ruleset`, `enabled`, `active` | – | – |
+| P11 | Flödena httpd:80 och zonvakt:7539 är tillåtna och fungerar | stämmer, med begränsning | `sudo nft list chain inet zon in \| grep -E 'dport (80\|7539)'`, `systemctl is-active httpd`, `ss -tln \| grep -E ':(80\|7539) '` | Reglerna finns, men bara från ctf-adressen (`<IP>`). `httpd` är `active` och port 80 och 7539 lyssnar. | för vidsträckt | Flödena är tillåtna från ctf-servern till httpd:80 och zonvakt:7539. |
+| P12 | Skriptet täcker inte att kedjans policy är drop | stämmer | `grep -c drop /usr/local/bin/verifiera-hardning` | `0` | – | – |
+| P13 | Port 7539 är märkt zonvakt_port_t | stämmer | `seinfo --portcon=7539`, `sudo semanage port -l \| grep zonvakt_port_t` | `portcon tcp 7539 ... zonvakt_port_t`, `zonvakt_port_t tcp 7539` | – | – |
+| P14 | generic_port-raden är borttagen och zonvakt_t kan bara binda zonvakt_port_t | stämmer | `grep -n 'generic_port\|zonvakt_port_t' ~/policy/zonvakt.te`, `sesearch -A -s zonvakt_t -c tcp_socket -p name_bind` | Ingen `generic_port` i filen. `sesearch` visar bara `zonvakt_port_t`. | – | – |
+| P15 | Port 7540 gav failed och AVC name_bind (unreserved_port_t, permissive=0) | stämmer | `sudo ausearch -m avc -i -ts 11/22/2026 \| grep src=7540` | Tre AVC (`name_bind`, `src=7540`, `unreserved_port_t`, `permissive=0`) 22 nov 07:00:15–16 UTC. Tre rader eftersom tjänsten startade om sig själv (`Restart=on-failure`). | – | – |
+| P16 | Skriptet rapporterar GÄLLER på fem kontroller | stämmer | `/usr/local/bin/verifiera-hardning` | Fem rader `GÄLLER`. | – | – |
+| P17 | sestatus visar `deny_unknown status: allowed` | stämmer | `sestatus` | `Policy deny_unknown status: allowed` | – | – |
