@@ -1,0 +1,77 @@
+[sudo] password for student: 
+=== insamlat: 2026-11-27 06:58:26
+### P1 sestatus
+SELinux status:                 enabled
+SELinuxfs mount:                /sys/fs/selinux
+SELinux root directory:         /etc/selinux
+Loaded policy name:             targeted
+Current mode:                   enforcing
+Mode from config file:          enforcing
+Policy MLS status:              enabled
+Policy deny_unknown status:     allowed
+Memory protection checking:     actual (secure)
+Max kernel policy version:      33
+### P2 ps -eZ
+system_u:system_r:zonvakt_t:s0     4126 ?        00:00:00 zonvakt
+### P3 semodule
+zonvakt
+### P4 omstarter
+reboot   system boot  5.14.0-687.54.1. Thu Nov 19 05:27   still running
+reboot   system boot  5.14.0-687.54.1. Thu Nov 12 10:12 - 05:27 (6+19:14)
+reboot   system boot  5.14.0-687.54.1. Mon Nov  9 07:35 - 10:12 (3+02:36)
+uppe sedan: 2026-11-19 05:27:27
+### P5 permissive/files_manage i .te
+(inga träffar)
+### P6 loggtyp och loggrader
+unconfined_u:object_r:zonvakt_log_t:s0 /var/log/zonvakt
+system_u:object_r:zonvakt_log_t:s0 zonvakt.log
+2026-11-22T07:00:56 startar namn=elev-39 port=7539
+2026-11-22T07:01:35 <IP> 'ctf' -> ok
+2026-11-22T07:01:35 <IP> 'overtrad' -> nekad: Permission denied
+### P9 nft in-kedjan
+table inet zon {
+	chain in {
+		type filter hook input priority filter; policy drop;
+		ct state established,related accept
+		ct state invalid drop
+		iif "lo" accept
+		ip saddr <IP> tcp dport 22 accept comment "D1 SSH från jump"
+		ip saddr <IP> tcp dport 22 accept comment "D2 kontroll från ctf"
+		ip saddr <IP>/28 tcp dport 443 accept comment "F5 från databas till app"
+		ip saddr <IP>/27 tcp dport 8080 accept comment "F3 från dmz till app"
+		ip saddr <IP> tcp dport 80 accept comment "U7.2 kontroll från ctf till httpd"
+		ip saddr <IP> tcp dport 7539 accept comment "U7.3 kontroll från ctf till zonvakt"
+		limit rate 10/minute burst 5 packets log prefix "ZON-IN-DROP " level info
+	}
+}
+### P10 zon.nft och nftables
+flush ruleset
+table inet zon {
+	chain in {
+enabled
+active
+### P11 flöden 80 och 7539
+		ip saddr <IP>/27 tcp dport 8080 accept comment "F3 från dmz till app"
+		ip saddr <IP> tcp dport 80 accept comment "U7.2 kontroll från ctf till httpd"
+		ip saddr <IP> tcp dport 7539 accept comment "U7.3 kontroll från ctf till zonvakt"
+### P12 'drop' i skriptet
+0
+### P13 portmärkning
+   portcon tcp 7539 system_u:object_r:zonvakt_port_t:s0
+zonvakt_port_t                 tcp      7539
+### P14 bindning i .te och policy
+26:type zonvakt_port_t;
+27:corenet_port(zonvakt_port_t);
+28:allow zonvakt_t zonvakt_port_t:tcp_socket name_bind;
+allow zonvakt_t zonvakt_port_t:tcp_socket name_bind;
+### P15 AVC för port 7540
+type=AVC msg=audit(11/22/2026 07:00:15.610:502) : avc:  denied  { name_bind } for  pid=4091 comm=zonvakt src=7540 scontext=system_u:system_r:zonvakt_t:s0 tcontext=system_u:object_r:unreserved_port_t:s0 tclass=tcp_socket permissive=0 
+type=AVC msg=audit(11/22/2026 07:00:15.794:511) : avc:  denied  { name_bind } for  pid=4095 comm=zonvakt src=7540 scontext=system_u:system_r:zonvakt_t:s0 tcontext=system_u:object_r:unreserved_port_t:s0 tclass=tcp_socket permissive=0 
+type=AVC msg=audit(11/22/2026 07:00:16.038:520) : avc:  denied  { name_bind } for  pid=4096 comm=zonvakt src=7540 scontext=system_u:system_r:zonvakt_t:s0 tcontext=system_u:object_r:unreserved_port_t:s0 tclass=tcp_socket permissive=0 
+### P16 skriptet
+GÄLLER: SELinux är i läge Enforcing nu (getenforce)
+GÄLLER: /etc/selinux/config sätter SELINUX=enforcing
+GÄLLER: zonvakt kör i domänen zonvakt_t (ps -eZ)
+GÄLLER: nftables är aktiverad vid boot och kör (systemctl)
+GÄLLER: port 7539 är märkt zonvakt_port_t och zonvakt_t får bara binda den (seinfo, sesearch)
+=== klart
